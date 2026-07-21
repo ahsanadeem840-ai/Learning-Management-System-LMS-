@@ -8,8 +8,14 @@ A modern, high-performance, and feature-rich Learning Management System (LMS) we
   - User Roles: Student, Instructor, Administrator
   - Core Features & Workflow Specifications
   - Frontend Design System & Architecture Plan
+  - See [docs/DAY1_REQUIREMENTS.md](docs/DAY1_REQUIREMENTS.md)
 
-Detailed documentation for Day 1 is available in [docs/DAY1_REQUIREMENTS.md](docs/DAY1_REQUIREMENTS.md).
+- **Day 2: User Stories & Acceptance Criteria** — *Completed*
+  - Detailed User Stories across 4 Epics (Auth, Learning Console, Studio, Admin)
+  - Functional Acceptance Criteria in Gherkin format (Given-When-Then)
+  - Prioritized Requirements Matrix
+  - See [docs/DAY2_USER_STORIES.md](docs/DAY2_USER_STORIES.md)
+
 
 ---
 
