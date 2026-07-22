@@ -16,9 +16,13 @@ A modern, high-performance, and feature-rich Learning Management System (LMS) we
   - Prioritized Requirements Matrix
   - See [docs/DAY2_USER_STORIES.md](docs/DAY2_USER_STORIES.md)
 
+- **Day 3: UI/UX Wireframes** — *Completed*
+  - Low-fidelity structural layouts for core screens (Home, Auth, Student/Instructor/Admin dashboards)
+  - Glassmorphic token guidelines and screen component mappings
+  - See [docs/DAY3_WIREFRAMES.md](docs/DAY3_WIREFRAMES.md)
 
 ---
 
 ## Getting Started
 
-*(Scaffolding & setup coming in Day 2)*
+*(Scaffolding & setup coming in Day 4)*
