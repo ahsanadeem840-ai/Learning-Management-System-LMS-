@@ -31,6 +31,14 @@ A modern, high-performance, and feature-rich Learning Management System (LMS) we
   - Established a clean directory structure (`src/components`, `src/context`, `src/data`, `src/layout`, `src/styles`, `src/app`).
   - Added a premium dark glassmorphic landing page (`src/app/page.js`) and pushed the first Next.js commit to GitHub.
 
+- **Module 2: Core Feature Implementation**
+  - **Day 1: Auth UI (login/signup) & Validation** — *Completed*
+    - Built premium glassmorphic Authentication page (`src/app/login/page.js`) supporting tabs.
+    - Added real-time client-side form validation (Email format check, Password length, Name required checks).
+    - Linked the Landing Page header buttons with query params (`?mode=signin` vs `?mode=signup`).
+    - Handled URL search params state synchronization and mock dashboard routing.
+    - See [docs/MODULE2_DOCUMENTATION.md](docs/MODULE2_DOCUMENTATION.md).
+
 ---
 
 ## Getting Started
