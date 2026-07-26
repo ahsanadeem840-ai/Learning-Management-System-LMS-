@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS Frontend - Module 1 Progress Documentation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+    
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+      background-color: var(--slate-50);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 60px 80px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border-radius: 8px;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', sans-serif;
+      color: var(--slate-900);
+      font-weight: 700;
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      page-break-after: avoid;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      border-bottom: 2px solid var(--slate-200);
+      padding-bottom: 8px;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-bottom: 1px solid var(--slate-200);
+      padding-bottom: 6px;
+      color: var(--primary);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      color: var(--slate-800);
+    }
+
+    p {
+      margin-bottom: 1em;
+      color: var(--text-main);
+    }
+
+    ul, ol {
+      margin-bottom: 1.5em;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 0.5em;
+    }
+
+    code {
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+      background: var(--slate-100);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+      background: var(--slate-900);
+      color: var(--slate-100);
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      font-size: 0.9em;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    th, td {
+      border: 1px solid var(--slate-200);
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--slate-100);
+      font-weight: 600;
+    }
+
+    /* Cover Page */
+    .cover-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 800px;
+      page-break-after: always;
+      text-align: center;
+      padding: 100px 0;
+    }
+
+    .cover-title {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--slate-900);
+      line-height: 1.1;
+      margin-bottom: 20px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .cover-subtitle {
+      font-size: 1.5rem;
+      color: var(--primary);
+      font-weight: 500;
+      margin-bottom: 50px;
+    }
+
+    .cover-metadata {
+      margin-top: auto;
+      border-top: 2px solid var(--slate-200);
+      padding-top: 30px;
+      text-align: left;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .metadata-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    .metadata-label {
+      font-weight: 600;
+      color: var(--slate-700);
+    }
+
+    .metadata-value {
+      color: var(--slate-900);
+    }
+
+    /* Divider */
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* Image Container */
+    .image-container {
+      text-align: center;
+      margin: 25px 0;
+      page-break-inside: avoid;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      border-radius: 6px;
+      border: 1px solid var(--slate-200);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .image-caption {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    
+    .badge-high {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-critical {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fee2e2;
+    }
+
+    .badge-medium {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background-color: #ffffff;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .cover-page {
+        min-height: 95vh;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- COVER PAGE -->
+    <div class="cover-page">
+      <div class="cover-title">Learning Management System (LMS)</div>
+      <div class="cover-subtitle">Frontend Requirements, Specification & Scaffolding</div>
+      <div class="cover-title" style="font-size: 1.8rem; margin-top: 50px; color: var(--slate-700);">Module 1 Submission Portfolio</div>
+      
+      <div class="cover-metadata">
+        <div class="metadata-row">
+          <span class="metadata-label">Intern / Student:</span>
+          <span class="metadata-value">Ahsan Adeem</span>
+        </div>
+        <div class="metadata-row">
+          <span class="metadata-label">Email:</span>
+          <span class="metadata-value">ahsanadeem840@gmail.com</span>
+        </div>
+        <div class="metadata-row">
+          <span class="metadata-label">Program:</span>
+          <span class="metadata-value">Frontend Web Development / Next.js React Developer</span>
+        </div>
+        <div class="metadata-row">
+          <span class="metadata-label">Project Scope:</span>
+          <span class="metadata-value">Module 1 (Requirement, UX & Scaffolding)</span>
+        </div>
+        <div class="metadata-row">
+          <span class="metadata-label">Date Completed:</span>
+          <span class="metadata-value">July 26, 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE OF CONTENTS -->
+    <h2>Table of Contents</h2>
+    <ol style="font-size: 1.1rem; line-height: 2;">
+      <li><a href="#introduction">Project Introduction & Overview</a></li>
+      <li><a href="#day1">Day 1: Requirement Analysis & Scope Specification</a></li>
+      <li><a href="#day2">Day 2: Detailed User Stories & Acceptance Criteria</a></li>
+      <li><a href="#day3">Day 3: UI/UX Wireframes & Screen Layout Maps</a></li>
+      <li><a href="#day4">Day 4: Design Token Setup & Mockup Finalization</a></li>
+      <li><a href="#day5">Day 5: Next.js + Tailwind CSS Scaffolding & Landing Page</a></li>
+      <li><a href="#summary">Repository & Verification Summary</a></li>
+    </ol>
+
+    <div class="page-break" id="introduction"></div>
+
+    <!-- INTRODUCTION -->
+    <h1>1. Project Introduction & Overview</h1>
+    <p>
+      The <strong>Learning Management System (LMS)</strong> is a state-of-the-art, high-performance web application designed to support three distinct user roles: <strong>Students</strong>, <strong>Instructors</strong>, and <strong>Platform Administrators</strong>. The system provides a seamless learning console, a powerful course builder studio, and intuitive moderation utilities.
+    </p>
+    <p>
+      During <strong>Module 1</strong>, the project was successfully planned, specified, and bootstrapped. A modern, dark-themed, glassmorphic design system was established, and a feature-rich Next.js landing page was implemented using Tailwind CSS v4.
+    </p>
+
+    <!-- DAY 1 -->
+    <h1 id="day1">2. Day 1: Requirement Analysis & Scope Specification</h1>
+    <p>
+      The core objectives of Day 1 focused on identifying user personas and determining the functional boundary of the LMS application. The target roles and their permission hierarchies are outlined below:
+    </p>
+    
+    <h3>User Roles & Core Feature Scope</h3>
+    <ul>
+      <li>
+        <strong>Student / Learner:</strong>
+        <ul>
+          <li>Course Discovery & Enrollment: Search, filter by category/rating/level, view syllabi, and enroll in courses.</li>
+          <li>Learning Console: Dynamic video player, curriculum sidebar, lesson notes, and Q&A discussion board.</li>
+          <li>Assessments: Timed quiz interface, assignment submissions, and progress indicators.</li>
+          <li>Credentials: Verification and download of beautiful, PDF completion certificates.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Instructor / Educator:</strong>
+        <ul>
+          <li>Instructor Dashboard: Analytics console covering total revenue, student enrollment, ratings, and course metrics.</li>
+          <li>Course Studio: Multi-step builder wizard (metadata, curriculum modules, video uploads, resource attachments).</li>
+          <li>Grading Console: Interface to grade assignments and provide text feedback.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Platform Administrator:</strong>
+        <ul>
+          <li>Admin Dashboard: Platform health metrics, active user registrations, and moderation queue.</li>
+          <li>User Management: Account administration for suspending/modifying accounts and roles.</li>
+          <li>Course Moderation: Queue to preview, approve, or reject (with comment logs) pending course submissions.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>Design System Archetype</h3>
+    <p>
+      A premium <strong>Dark Mode Glassmorphic</strong> archetype was chosen, styled with:
+    </p>
+    <ul>
+      <li>Canvas Background: Deep Slate <code>#0F172A</code></li>
+      <li>Primary Accent: Indigo Glow <code>#6366F1</code></li>
+      <li>Glass Components: <code>rgba(30, 41, 59, 0.7)</code> with a <code>12px</code> backdrop blur filter and a subtle <code>1px solid rgba(255, 255, 255, 0.08)</code> border.</li>
+    </ul>
+
+    <div class="page-break" id="day2"></div>
+
+    <!-- DAY 2 -->
+    <h1>3. Day 2: Detailed User Stories & Acceptance Criteria</h1>
+    <p>
+      Functional specs were detailed using User Stories mapped with <strong>Gherkin (Given-When-Then) Acceptance Criteria</strong>. Below is the compiled matrix of core stories:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Epic Area</th>
+          <th>ID</th>
+          <th>User Story (Summary)</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Auth & Navigation</td>
+          <td>US-01</td>
+          <td>Register accounts with role-based routing (Student vs Instructor)</td>
+          <td><span class="badge badge-high">High</span></td>
+        </tr>
+        <tr>
+          <td>Auth & Navigation</td>
+          <td>US-02</td>
+          <td>Role-based header navigation options (Explore, Studio, Admin Queue)</td>
+          <td><span class="badge badge-high">High</span></td>
+        </tr>
+        <tr>
+          <td>Student Console</td>
+          <td>US-03</td>
+          <td>Filterable, search-as-you-type course directory catalog</td>
+          <td><span class="badge badge-high">High</span></td>
+        </tr>
+        <tr>
+          <td>Student Console</td>
+          <td>US-04</td>
+          <td>Detailed syllabus accordion and single-click course enrollment CTA</td>
+          <td><span class="badge badge-high">High</span></td>
+        </tr>
+        <tr>
+          <td>Student Console</td>
+          <td>US-05</td>
+          <td>Interactive media console with sidebar curriculum navigation & auto-completion</td>
+          <td><span class="badge badge-critical">Critical</span></td>
+        </tr>
+        <tr>
+          <td>Student Console</td>
+          <td>US-06</td>
+          <td>Private notepad with video timestamps & Q&A thread board</td>
+          <td><span class="badge badge-critical">Critical</span></td>
+        </tr>
+        <tr>
+          <td>Student Console</td>
+          <td>US-07</td>
+          <td>Timed quiz manager with score cards and rationales</td>
+          <td><span class="badge badge-medium">Medium</span></td>
+        </tr>
+        <tr>
+          <td>Student Console</td>
+          <td>US-08</td>
+          <td>Printable glassmorphic completion certificates</td>
+          <td><span class="badge badge-medium">Medium</span></td>
+        </tr>
+        <tr>
+          <td>Instructor Studio</td>
+          <td>US-09</td>
+          <td>Multi-step course wizard (Info -> Curriculum -> Pricing -> Publish)</td>
+          <td><span class="badge badge-critical">Critical</span></td>
+        </tr>
+        <tr>
+          <td>Instructor Studio</td>
+          <td>US-10</td>
+          <td>Student gradebook table, grading action form, and feedback logs</td>
+          <td><span class="badge badge-critical">Critical</span></td>
+        </tr>
+        <tr>
+          <td>Admin Board</td>
+          <td>US-11</td>
+          <td>Moderation catalog queue with preview, approve, and reject comments</td>
+          <td><span class="badge badge-medium">Medium</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Sample Acceptance Criteria (Gherkin Format)</h3>
+    <pre><code># US-05: Learning Video Console
+Scenario: Selecting a lesson from the curriculum panel
+  Given the student is on the Learning Console page (/learn/:courseId)
+  When they click on Lesson 3 in the curriculum sidebar
+  Then the central video player loads the Lesson 3 media file
+  And the lesson title updates in the header layout.
+
+Scenario: Lesson playback completion triggers milestone
+  Given the video player is playing a course lesson
+  When the current playback runtime reaches 100% (ended)
+  Then the specific lesson list item shows a completed checkmark badge
+  And the overall progress bar increments automatically.</code></pre>
+
+    <div class="page-break" id="day3"></div>
+
+    <!-- DAY 3 -->
+    <h1>4. Day 3: UI/UX Wireframes & Screen Layout Maps</h1>
+    <p>
+      Low-fidelity structural design wireframes were created to lock in the layout before writing code. Images of these wireframes are available in the repository.
+    </p>
+
+    <div class="image-container">
+      <img src="./images/home_wireframe.jpg" alt="Home Page Wireframe">
+      <div class="image-caption">Figure 4.1: Home/Landing Page Layout Wireframe</div>
+    </div>
+
+    <div class="image-container">
+      <img src="./images/auth_wireframe.jpg" alt="Auth Page Wireframe">
+      <div class="image-caption">Figure 4.2: Account Registration / Authentication Card Wireframe</div>
+    </div>
+
+    <div class="image-container">
+      <img src="./images/student_dashboard_wireframe.jpg" alt="Student Dashboard Wireframe">
+      <div class="image-caption">Figure 4.3: Student Dashboard & Carousel Layout Wireframe</div>
+    </div>
+
+    <div class="image-container">
+      <img src="./images/instructor_dashboard_wireframe.jpg" alt="Instructor Dashboard Wireframe">
+      <div class="image-caption">Figure 4.4: Instructor Studio Dashboard Wireframe</div>
+    </div>
+
+    <div class="image-container">
+      <img src="./images/admin_dashboard_wireframe.jpg" alt="Admin Dashboard Wireframe">
+      <div class="image-caption">Figure 4.5: Admin Moderation Queue Dashboard Wireframe</div>
+    </div>
+
+    <div class="page-break" id="day4"></div>
+
+    <!-- DAY 4 -->
+    <h1>5. Day 4: Design Token Setup & Mockup Finalization</h1>
+    <p>
+      In Day 4, the structural wireframe blueprints were finalized into high-fidelity component layouts. To prepare for application development, the visual style guide was mapped to concrete utility specifications:
+    </p>
+    <ul>
+      <li>
+        <strong>Glass Panel Specifications:</strong> 
+        <code>backdrop-filter: blur(12px); background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);</code>
+      </li>
+      <li>
+        <strong>Card Shadow Specs:</strong> 
+        <code>box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);</code>
+      </li>
+      <li>
+        <strong>Grid Structure:</strong> 12-column responsive layout that wraps to a single column on mobile devices (<code>&lt;768px</code>).
+      </li>
+    </ul>
+
+    <!-- DAY 5 -->
+    <h1 id="day5">6. Day 5: Next.js + Tailwind CSS Scaffolding & Landing Page</h1>
+    <p>
+      Day 5 saw the migration from the temporary Vite template to a robust, search-engine-optimized <strong>Next.js 16 (App Router)</strong> skeleton using <strong>Tailwind CSS v4</strong>.
+    </p>
+    
+    <h3>Scaffolded Directory Blueprint</h3>
+    <pre><code>src/
+├── app/
+│   ├── favicon.ico
+│   ├── layout.js          # Shared HTML layout, Google Fonts integration
+│   └── page.js            # Premium dark glassmorphic landing page
+├── components/            # Shared components (Navbar, CourseCard, GlassPanel)
+├── context/               # AuthState, CourseState context providers
+├── data/                  # Mock course catalog data & analytics metrics
+├── layout/                # Global dashboard wrappers
+└── styles/                # Tailwind v4 globals & custom animation classes</code></pre>
+
+    <h3>Glassmorphic Hero Landing Page Features</h3>
+    <p>
+      The initial landing page code was written inside <code>src/app/page.js</code>, utilizing Tailwind v4 custom styles:
+    </p>
+    <ul>
+      <li>
+        <strong>Interactive Glow:</strong> Organic glowing circles (Indigo/Purple) placed absolutely with a <code>blur-[120px]</code> to create a futuristic ambiance.
+      </li>
+      <li>
+        <strong>Navbar Header:</strong> Sticky, frosted glass panel that uses <code>backdrop-blur-md</code> and includes an expandable search bar, logo, and action CTAs.
+      </li>
+      <li>
+        <strong>Visual Statistics Panel:</strong> Quick data widgets showing <em>10k+ Active Learners</em>, <em>250+ Instructors</em>, and <em>1.2k+ Premium Courses</em> in styled glass containers.
+      </li>
+      <li>
+        <strong>Responsive Catalog Grid:</strong> A grid featuring categories like <em>Development, Design, Data Science & AI</em>, and <em>Marketing</em> that transition smoothly on hover.
+      </li>
+    </ul>
+
+    <div class="page-break" id="summary"></div>
+
+    <!-- SUMMARY -->
+    <h1>7. Repository & Verification Summary</h1>
+    <p>
+      The complete codebase is organized cleanly, fully committed, and hosted on GitHub.
+    </p>
+    
+    <h3>Repository Details</h3>
+    <ul>
+      <li><strong>Repository Name:</strong> Learning-Management-System-LMS-</li>
+      <li><strong>GitHub Remote URL:</strong> <a href="https://github.com/ahsanadeem840-ai/Learning-Management-System-LMS-" target="_blank">https://github.com/ahsanadeem840-ai/Learning-Management-System-LMS-</a></li>
+      <li><strong>Primary Developer:</strong> Ahsan Adeem (ahsanadeem840@gmail.com)</li>
+    </ul>
+
+    <h3>Verification & Launch Instructions</h3>
+    <p>
+      To run the Next.js frontend app locally:
+    </p>
+    <pre><code># 1. Clone repository
+git clone https://github.com/ahsanadeem840-ai/Learning-Management-System-LMS-.git
+cd Learning-Management-System-LMS-
+
+# 2. Install dependencies
+npm install
+
+# 3. Launch Development Server
+npm run dev
+
+# 4. Access Local Deployment
+# Open http://localhost:3000 in your browser.</code></pre>
+
+    <div style="margin-top: 50px; border-top: 1px solid var(--slate-300); padding-top: 20px; text-align: center; color: var(--text-muted); font-size: 0.9em;">
+      End of Portfolio Document - Compiled for Module 1 Submission.
+    </div>
+
+  </div>
+</body>
+</html>
