@@ -8,18 +8,19 @@ This document compiles the work completed during **Module 2** (Core Feature Impl
 - **Student / Intern Name:** Ahsan Adeem
 - **Email:** ahsanadeem840@gmail.com
 - **Program:** Frontend Web Development / Next.js React Developer
-- **Milestone:** Module 2 - Core Feature Implementation (Day 1: Authentication UI & Validation)
+- **Milestone:** Module 2 - Core Feature Implementation (Day 1 & Day 2: Auth UI, Dedicated Signup & Validation)
 - **Repository URL:** [GitHub Repository](https://github.com/ahsanadeem840-ai/Learning-Management-System-LMS-)
 
 ---
 
 ## Table of Contents
 1. [Day 1: Auth UI (login/signup) & Validation](#day-1-auth-ui-loginsignup--validation)
-   - [Design & Visual Language](#design--visual-language)
-   - [Functional Features & State Architecture](#functional-features--state-architecture)
-   - [Interactive Success & Routing Logic](#interactive-success--routing-logic)
-2. [Code Structure Reference](#code-structure-reference)
-3. [Local Verification & Execution](#local-verification--execution)
+2. [Day 2: Dedicated Signup Page UI & Real-Time Validation](#day-2-dedicated-signup-page-ui--real-time-validation)
+   - [Premium Design & Tailored Colors](#premium-design--tailored-colors)
+   - [Password Strength & Confirmation Checks](#password-strength--confirmation-checks)
+   - [Submission Redirection Pathways](#submission-redirection-pathways)
+3. [Code Structure Reference](#code-structure-reference)
+4. [Local Verification & Execution](#local-verification--execution)
 
 ---
 
@@ -59,10 +60,31 @@ Submitting the form triggers a loading spinner simulating authentication verific
 
 ---
 
+## Day 2: Dedicated Signup Page UI & Real-Time Validation
+We designed and implemented a dedicated registration console under `/signup` to separate concerns from the login flow while using common styling tokens and layout themes.
+
+### Premium Design & Tailored Colors
+- **Tailored Gradient Overlays**: Background radial gradients in fuchsia and purple combine with the original indigo overlay to create deep spatial color depth.
+- **Micro-animations**: Glowing focus borders on input inputs, smooth tab slider selection navigation to `/login`, and hover scalability on CTA buttons.
+- **Semantic Structure**: Rendered under standard semantic HTML elements utilizing unique, descriptive test identifiers.
+
+### Password Strength & Confirmation Checks
+- **Interactive Password Strength Meter**: A live evaluation bar that updates dynamically as the user types (Weak -> Medium -> Strong) using color indicators.
+- **Confirmation Fields**: Added a confirm password input validating that matches are verified before permitting form submission.
+- **Show/Hide password toggles**: Dual show/hide toggles are integrated inside both Password and Confirm Password inputs.
+
+### Submission Redirection Pathways
+- **1.5s simulated loading spinner** to mock registration checking.
+- **Success page** displays personalized welcome messages.
+- **Simulated redirection** dynamically handles routes based on chosen registration roles (Student Dashboard vs Instructor Studio).
+
+---
+
 ## Code Structure Reference
 
 The application logic resides in:
-- [src/app/login/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/login/page.js): The main page component rendering the form inside a Next.js `Suspense` wrapper (required for address bar search query reads).
+- [src/app/login/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/login/page.js): Dedicated Sign-In page handling authentication routes.
+- [src/app/signup/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/signup/page.js): Dedicated Sign-Up page handling registration routes.
 
 Key UI styling tokens from `src/styles/globals.css`:
 ```css
@@ -79,11 +101,12 @@ Key UI styling tokens from `src/styles/globals.css`:
 
 ## Local Verification & Execution
 
-To test the login system:
+To test the authentication system:
 1. Fire up the development environment:
    ```bash
    npm run dev
    ```
-2. Navigate to **[http://localhost:3000/login](http://localhost:3000/login)** or click **Login** / **Join Now** from the home page.
-3. Test validation by typing malformed emails or clicking submit on empty fields.
-4. Fill out the forms to witness the loading, success, and redirection flows.
+2. Navigate to **[http://localhost:3000/](http://localhost:3000/)** and click **Login** or **Join Now**.
+3. Test validation on `/signup` by typing mismatched passwords, invalid emails, or leaving the name input blank.
+4. Verify show/hide password buttons, role selector toggles, and the password strength bar.
+5. Submit the registration form to verify mock validation loader, success alerts, and redirection simulations.

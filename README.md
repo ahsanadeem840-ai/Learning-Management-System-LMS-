@@ -37,6 +37,11 @@ A modern, high-performance, and feature-rich Learning Management System (LMS) we
     - Added real-time client-side form validation (Email format check, Password length, Name required checks).
     - Linked the Landing Page header buttons with query params (`?mode=signin` vs `?mode=signup`).
     - Handled URL search params state synchronization and mock dashboard routing.
+  - **Day 2: Dedicated Signup Page UI & Validation** — *Completed*
+    - Created dedicated `/signup` page with premium layout and tailored color combinations.
+    - Added real-time validation checks for Full Name, Email, Password, and Confirm Password matching.
+    - Built an interactive Password Strength indicator and show/hide password buttons.
+    - Updated routing logic on the landing page and login page tab selector.
     - See [docs/MODULE2_DOCUMENTATION.md](docs/MODULE2_DOCUMENTATION.md).
 
 ---

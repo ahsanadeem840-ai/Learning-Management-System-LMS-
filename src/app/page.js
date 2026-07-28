@@ -47,10 +47,10 @@ export default function Home() {
 
           {/* CTA Buttons */}
           <div className="flex items-center gap-3">
-            <Link href="/login?mode=signin" className="text-sm font-medium hover:text-white transition-colors px-4 py-2 text-slate-300">
+            <Link href="/login" className="text-sm font-medium hover:text-white transition-colors px-4 py-2 text-slate-300">
               Login
             </Link>
-            <Link href="/login?mode=signup" className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-full px-5 py-2 transition-all duration-200 shadow-md shadow-indigo-500/20">
+            <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-full px-5 py-2 transition-all duration-200 shadow-md shadow-indigo-500/20">
               Join Now
             </Link>
           </div>
