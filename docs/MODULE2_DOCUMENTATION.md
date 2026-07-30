@@ -105,6 +105,24 @@ We created functional sandbox pages for all sidebar items to offer a complete ex
 
 ---
 
+## Day 4: Instructor and Platform Admin Dashboards & Navigation Layouts
+We built premium, responsive workspaces for both the **Instructor Studio** and the **Platform Admin Console**, resolving routing gaps and offering complete interactive dashboards for all roles.
+
+### Instructor Studio (`/instructor`)
+- **Shared Navigation layout (`/instructor/layout.js`)**: Matches the design system of the student layout with collapsible sidebar, active route indicators, notifications alerts, and custom profile sign-out flows.
+- **Instructor Dashboard (`/instructor/dashboard/page.js`)**: Shows mock revenue stats, active student enrollments, and an interactive review feed where instructors can reply to student feedback inline.
+- **My Courses Catalog (`/instructor/my-courses/page.js`)**: Displays the list of courses. Features a **3-step course creation wizard modal** (Basic Info -> Syllabus configuration -> Pricing) that updates state locally in real-time.
+- **Student Gradebook (`/instructor/gradebook/page.js`)**: Displays task submissions from students with a **popup grading console** to assign score percentages and save written feedback.
+- **Performance Analytics (`/instructor/analytics/page.js`)**: Visualizes video watch times using animated SVG bar charts and device distribution using custom pie chart SVG components.
+
+### Platform Admin Console (`/admin`)
+- **Admin Dashboard Layout (`/admin/layout.js`)**: Features fuchsia governance themed responsive layouts supporting collapsing sidebar on desktop and drawer on mobile viewports.
+- **Governance Console (`/admin/dashboard/page.js`)**: Aggregates platform active users, monthly revenue, pending reviews, growth chart SVG visualizations, and system logs.
+- **Users Directory (`/admin/users/page.js`)**: Lists all registered students and instructors with search filters and a toggle block action.
+- **Moderation Queue (`/admin/moderation/page.js`)**: Manages course approval processes with interactive view previews and direct "Approve" / "Reject" (comments-enabled) buttons.
+
+---
+
 ## Code Structure Reference
 
 The application logic resides in:
@@ -115,6 +133,15 @@ The application logic resides in:
 - [src/app/student/my-learning/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/student/my-learning/page.js): Segmented workspace grouping in-progress studies from completed courses.
 - [src/app/student/certificates/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/student/certificates/page.js): Verified credentials list with custom popup certificates viewer.
 - [src/app/student/profile/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/student/profile/page.js): Profile editor console supporting save indicators and data forms.
+- [src/app/instructor/layout.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/instructor/layout.js): Shared navigation wrapper for the Instructor Studio.
+- [src/app/instructor/dashboard/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/instructor/dashboard/page.js): Instructor metrics panel with SVG performance charts and review feedback.
+- [src/app/instructor/my-courses/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/instructor/my-courses/page.js): Instructor courses directory with a custom multi-step course wizard.
+- [src/app/instructor/gradebook/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/instructor/gradebook/page.js): Gradebook directory showing student submissions with interactive scoring popups.
+- [src/app/instructor/analytics/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/instructor/analytics/page.js): Course watch times and device distribution metrics.
+- [src/app/admin/layout.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/admin/layout.js): Platform governance navigation layout.
+- [src/app/admin/dashboard/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/admin/dashboard/page.js): System-wide logs dashboard.
+- [src/app/admin/users/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/admin/users/page.js): Directory of student/instructor accounts with block toggles.
+- [src/app/admin/moderation/page.js](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/admin/moderation/page.js): Course queue with approval and revision comments.
 
 Key UI styling tokens from `src/styles/globals.css`:
 ```css
@@ -131,12 +158,13 @@ Key UI styling tokens from `src/styles/globals.css`:
 
 ## Local Verification & Execution
 
-To test the authentication and student dashboard system:
+To test the authentication and dashboard systems:
 1. Fire up the development environment:
    ```bash
    npm run dev
    ```
-2. Navigate to **[http://localhost:3000/](http://localhost:3000/)** and login/sign up. On submission, the loader will transition you automatically to `/student/dashboard`.
-3. Try clicking the "Resume Learning" actions to verify active loaders, or enroll in a recommended course to test instant card transfers and green success toasts.
-4. Open the Explore panel, type search criteria, or click categories to test instant reactivity.
-5. Check My Learning tabs, launch the Certificates modal (click "View Certificate"), and save updates inside the Profile settings form.
+2. Navigate to **[http://localhost:3000/login](http://localhost:3000/login)**.
+3. Sign in using an email containing `instructor` keyword to redirect to the Instructor Studio dashboard.
+4. Sign in using an email containing `admin` keyword to redirect to the Platform admin control panel.
+5. Alternatively, sign up via **[http://localhost:3000/signup](http://localhost:3000/signup)** and select your role to verify redirection pathways.
+
