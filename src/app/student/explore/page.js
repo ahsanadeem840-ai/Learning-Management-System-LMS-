@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { coursesData } from "@/data/courses";
 
 export default function ExploreCourses() {
+  const router = useRouter();
+
   useEffect(() => {
     document.title = "Explore Courses | LMS Studio";
   }, []);
@@ -10,117 +14,53 @@ export default function ExploreCourses() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [enrollSuccessMessage, setEnrollSuccessMessage] = useState("");
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+
+  // Sync enrolled courses from localStorage
+  const syncEnrollments = () => {
+    const saved = localStorage.getItem("lms_enrolled_courses");
+    if (saved) {
+      setEnrolledCourseIds(JSON.parse(saved));
+    } else {
+      // Default initial enrollments from page setup
+      const initial = ["nextjs15", "uiuxfigma"];
+      localStorage.setItem("lms_enrolled_courses", JSON.stringify(initial));
+      setEnrolledCourseIds(initial);
+    }
+  };
+
+  useEffect(() => {
+    syncEnrollments();
+
+    // Listen to custom updates (from details page)
+    window.addEventListener("lms_enrollment_updated", syncEnrollments);
+    return () => {
+      window.removeEventListener("lms_enrollment_updated", syncEnrollments);
+    };
+  }, []);
 
   const categories = ["All", "Development", "Design", "Data Science & AI", "Marketing"];
 
-  const [courses, setCourses] = useState([
-    {
-      id: "nextjs15",
-      title: "Next.js 15 Masterclass: App Router & Server Actions",
-      instructor: "Alex Rivers",
-      rating: 4.9,
-      reviews: 1240,
-      price: "$89.00",
-      category: "Development",
-      duration: "24h 45m",
-      lessons: 20,
-      enrolled: true,
-      tag: "Bestseller",
-      tagBg: "bg-indigo-600 text-white",
-    },
-    {
-      id: "introai",
-      title: "Intro to AI: Deep Neural Networks from Scratch",
-      instructor: "Dr. Sarah Chen",
-      rating: 4.8,
-      reviews: 840,
-      price: "$119.00",
-      category: "Data Science & AI",
-      duration: "18h 30m",
-      lessons: 25,
-      enrolled: false,
-      tag: "New",
-      tagBg: "bg-pink-600 text-white",
-    },
-    {
-      id: "uiuxfigma",
-      title: "UI/UX Design Systems with Figma: Scalable & Modern",
-      instructor: "Marcus Vance",
-      rating: 4.7,
-      reviews: 910,
-      price: "$79.00",
-      category: "Design",
-      duration: "15h 20m",
-      lessons: 20,
-      enrolled: true,
-    },
-    {
-      id: "growthmarketing",
-      title: "Growth Hacking: Modern SEO & Social Media Marketing",
-      instructor: "Jane Doe",
-      rating: 4.6,
-      reviews: 190,
-      price: "Free",
-      category: "Marketing",
-      duration: "8h 15m",
-      lessons: 14,
-      enrolled: false,
-      tag: "Popular",
-      tagBg: "bg-emerald-600 text-white",
-    },
-    {
-      id: "tailwindcssv4",
-      title: "Tailwind CSS v4 in Depth: From Utility to Production",
-      instructor: "Brad Traversy",
-      rating: 4.9,
-      reviews: 320,
-      price: "$49.00",
-      category: "Development",
-      duration: "12h 45m",
-      lessons: 18,
-      enrolled: false,
-      tag: "Hot",
-      tagBg: "bg-indigo-600 text-white",
-    },
-    {
-      id: "reactnative",
-      title: "React Native: Build Native Mobile Apps with JavaScript",
-      instructor: "Maximilian Schwarz",
-      rating: 4.8,
-      reviews: 670,
-      price: "$99.00",
-      category: "Development",
-      duration: "30h 10m",
-      lessons: 32,
-      enrolled: false,
-    },
-    {
-      id: "productman",
-      title: "Product Management: From Strategy to Product Launch",
-      instructor: "Sarah Jenkins",
-      rating: 4.5,
-      reviews: 145,
-      price: "$69.00",
-      category: "Marketing",
-      duration: "10h 30m",
-      lessons: 12,
-      enrolled: false,
-    },
-  ]);
+  const handleEnroll = (courseId, courseTitle) => {
+    const saved = localStorage.getItem("lms_enrolled_courses");
+    let list = saved ? JSON.parse(saved) : [];
+    if (!list.includes(courseId)) {
+      list.push(courseId);
+      localStorage.setItem("lms_enrolled_courses", JSON.stringify(list));
+      setEnrolledCourseIds(list);
+    }
 
-  const handleEnroll = (courseId) => {
-    const course = courses.find((c) => c.id === courseId);
-    if (!course || course.enrolled) return;
-
-    setCourses((prev) =>
-      prev.map((c) => (c.id === courseId ? { ...c, enrolled: true } : c))
-    );
-
-    setEnrollSuccessMessage(`Successfully enrolled in "${course.title}"!`);
+    setEnrollSuccessMessage(`Successfully enrolled in "${courseTitle}"!`);
     setTimeout(() => {
       setEnrollSuccessMessage("");
     }, 4000);
   };
+
+  // Map coursesData to local state with correct enrolled property
+  const courses = coursesData.map((course) => ({
+    ...course,
+    enrolled: enrolledCourseIds.includes(course.id),
+  }));
 
   // Filter courses based on search & category
   const filteredCourses = courses.filter((course) => {
@@ -193,7 +133,8 @@ export default function ExploreCourses() {
           {filteredCourses.map((course) => (
             <div
               key={course.id}
-              className="glass-panel rounded-2xl overflow-hidden hover:border-white/15 transition-all duration-300 flex flex-col justify-between group"
+              onClick={() => router.push(`/student/explore/${course.id}`)}
+              className="glass-panel rounded-2xl overflow-hidden hover:border-white/15 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
             >
               {/* Card Banner */}
               <div className="h-32 bg-slate-800/40 border-b border-white/5 relative flex items-center justify-center p-4">
@@ -240,6 +181,7 @@ export default function ExploreCourses() {
                   {course.enrolled ? (
                     <button
                       disabled
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed"
                     >
                       <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -249,7 +191,10 @@ export default function ExploreCourses() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleEnroll(course.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEnroll(course.id, course.title);
+                      }}
                       className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 text-xs font-bold py-2.5 px-4 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-1"
                     >
                       Enroll Now

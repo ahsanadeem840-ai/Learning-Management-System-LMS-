@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { coursesData } from "@/data/courses";
+
 
 export default function Home() {
   return (
@@ -205,92 +207,50 @@ export default function Home() {
             <h2 className="text-3xl font-extrabold text-white">Popular Premium Courses</h2>
             <p className="text-slate-400 text-sm mt-1">Taught by highly rated industry instructors.</p>
           </div>
-          <button className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1">
+          <Link href="/login" className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1">
             See all courses &rarr;
-          </button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Course 1 */}
-          <div className="glass-panel rounded-2xl overflow-hidden group hover:border-indigo-500/25 transition-all duration-300 flex flex-col">
-            <div className="relative h-48 w-full bg-slate-800 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-60 z-10" />
-              <span className="text-5xl font-black text-indigo-500/20 group-hover:scale-105 transition-transform duration-300">Next.js 15</span>
-              <div className="absolute top-4 left-4 z-20 bg-indigo-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                Bestseller
+          {coursesData.slice(0, 3).map((course) => (
+            <Link
+              href={`/courses/${course.id}`}
+              key={course.id}
+              className="glass-panel rounded-2xl overflow-hidden group hover:border-indigo-500/25 transition-all duration-300 flex flex-col cursor-pointer"
+            >
+              <div className="relative h-48 w-full bg-slate-800 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-60 z-10" />
+                <span className="text-4.5xl font-black text-indigo-500/20 group-hover:scale-105 transition-transform duration-300 select-none">
+                  {course.category}
+                </span>
+                {course.tag && (
+                  <div className={`absolute top-4 left-4 z-20 font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider ${course.tagBg || "bg-indigo-600 text-white"}`}>
+                    {course.tag}
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="p-6 flex-1 flex flex-col justify-between">
-              <div>
-                <span className="text-xs text-indigo-400 font-semibold uppercase">Development</span>
-                <h3 className="text-lg font-bold text-white mt-1 group-hover:text-indigo-300 transition-colors leading-snug">
-                  Next.js 15 Masterclass: App Router & Server Actions
-                </h3>
-                <p className="text-xs text-slate-400 mt-2">By Alex Rivers, Senior Web Engineer</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-1 text-yellow-400 text-sm font-bold">
-                  <span>4.9</span>
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  <span className="text-slate-500 font-normal text-xs">(1,240 reviews)</span>
+              <div className="p-6 flex-1 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs text-indigo-400 font-semibold uppercase">{course.category}</span>
+                  <h3 className="text-lg font-bold text-white mt-1 group-hover:text-indigo-300 transition-colors leading-snug">
+                    {course.title}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-2">By {course.instructor}</p>
                 </div>
-                <div className="text-lg font-black text-white">$89.00</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Course 2 */}
-          <div className="glass-panel rounded-2xl overflow-hidden group hover:border-pink-500/25 transition-all duration-300 flex flex-col">
-            <div className="relative h-48 w-full bg-slate-800 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-60 z-10" />
-              <span className="text-5xl font-black text-pink-500/20 group-hover:scale-105 transition-transform duration-300">Neural Nets</span>
-              <div className="absolute top-4 left-4 z-20 bg-pink-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                New
-              </div>
-            </div>
-            <div className="p-6 flex-1 flex flex-col justify-between">
-              <div>
-                <span className="text-xs text-pink-400 font-semibold uppercase">Data Science & AI</span>
-                <h3 className="text-lg font-bold text-white mt-1 group-hover:text-pink-300 transition-colors leading-snug">
-                  Intro to AI: Deep Neural Networks from Scratch
-                </h3>
-                <p className="text-xs text-slate-400 mt-2">By Dr. Sarah Chen, AI Researcher</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-1 text-yellow-400 text-sm font-bold">
-                  <span>4.8</span>
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  <span className="text-slate-500 font-normal text-xs">(840 reviews)</span>
+                <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-yellow-400 text-sm font-bold">
+                    <span>{course.rating}</span>
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span className="text-slate-500 font-normal text-xs">({course.reviews} reviews)</span>
+                  </div>
+                  <div className="text-lg font-black text-white">{course.price}</div>
                 </div>
-                <div className="text-lg font-black text-white">$119.00</div>
               </div>
-            </div>
-          </div>
-
-          {/* Course 3 */}
-          <div className="glass-panel rounded-2xl overflow-hidden group hover:border-purple-500/25 transition-all duration-300 flex flex-col">
-            <div className="relative h-48 w-full bg-slate-800 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-60 z-10" />
-              <span className="text-5xl font-black text-purple-500/20 group-hover:scale-105 transition-transform duration-300">UI Figma</span>
-            </div>
-            <div className="p-6 flex-1 flex flex-col justify-between">
-              <div>
-                <span className="text-xs text-purple-400 font-semibold uppercase">Design & UI/UX</span>
-                <h3 className="text-lg font-bold text-white mt-1 group-hover:text-purple-300 transition-colors leading-snug">
-                  UI/UX Design Systems with Figma: Scalable & Modern
-                </h3>
-                <p className="text-xs text-slate-400 mt-2">By Marcus Vance, Product Designer</p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-1 text-yellow-400 text-sm font-bold">
-                  <span>4.7</span>
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  <span className="text-slate-500 font-normal text-xs">(910 reviews)</span>
-                </div>
-                <div className="text-lg font-black text-white">$79.00</div>
-              </div>
-            </div>
-          </div>
+            </Link>
+          ))}
         </div>
       </section>
 
