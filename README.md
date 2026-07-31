@@ -54,6 +54,11 @@ A modern, high-performance, and feature-rich Learning Management System (LMS) we
     - Built Instructor Dashboard with custom charts and inline review response tags, Course Studio with multi-step creation wizard, Student Gradebook grading portal, and Analytics charts page.
     - Built Platform Admin Dashboard with active system logs, Users directory with activate/suspend buttons, and Moderation queue with course approve/reject mechanisms.
     - Verified successful compilation of all routes under production builds.
+  - **Day 5: Course Listing & Details UI** — *Completed*
+    - Created mock course database (`src/data/courses.js`) containing syllabus curriculum, reviews, FAQs, features, and instructor details.
+    - Built public Course Detail layout (`src/app/courses/[courseId]/page.js`) with syllabus accordion, stats grid, and floating glassmorphic sidebar checkout card.
+    - Implemented enrolled Student Course Console (`src/app/student/explore/[courseId]/page.js`) with interactive curriculum lesson navigation check-marks and tabs for Announcements, Info, and Reviews.
+    - Updated Landing Page and Student Dashboard catalogs to support dynamic routing to Course details page.
 
 ---
 
