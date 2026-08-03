@@ -3,49 +3,81 @@
 import { useState, useEffect } from "react";
 
 export default function InstructorGradebook() {
-  useEffect(() => {
-    document.title = "Gradebook | LMS Studio";
-  }, []);
-
-  const [submissions, setSubmissions] = useState([
-    {
-      id: 1,
-      studentName: "Ahsan Adeem",
-      course: "Next.js 15 Masterclass",
-      assignment: "Module 2: Custom Layout Structure",
-      date: "Jul 29, 2026",
-      fileName: "layout-source-v2.zip",
-      status: "Pending Review",
-      grade: null,
-      feedback: "",
-    },
-    {
-      id: 2,
-      studentName: "John Smith",
-      course: "React Fundamental Course",
-      assignment: "Module 1 Quiz: Hooks & Context API",
-      date: "Jul 27, 2026",
-      fileName: "react-quiz-answers.pdf",
-      status: "Graded",
-      grade: 92,
-      feedback: "Great work explaining context updates and handling cleanups in useEffect hook. Keep it up!",
-    },
-    {
-      id: 3,
-      studentName: "Sarah Jenkins",
-      course: "Next.js 15 Masterclass",
-      assignment: "Module 1: Server Actions & Form validation",
-      date: "Jul 25, 2026",
-      fileName: "form-action-submission.js",
-      status: "Pending Review",
-      grade: null,
-      feedback: "",
-    },
-  ]);
-
+  const [submissions, setSubmissions] = useState([]);
   const [selectedSub, setSelectedSub] = useState(null);
   const [gradeInput, setGradeInput] = useState("");
   const [feedbackInput, setFeedbackInput] = useState("");
+
+  useEffect(() => {
+    document.title = "Gradebook | LMS Studio";
+    
+    // Seed and sync submissions
+    const savedSubmissions = localStorage.getItem("lms_submissions");
+    const defaultSubmissions = [
+      {
+        id: 1,
+        studentName: "Ahsan Adeem",
+        courseId: "nextjs15",
+        course: "Next.js 15 Masterclass",
+        assignmentId: "nextjs15_a2",
+        assignment: "Module 2: Custom Layout Structure",
+        date: "Jul 29, 2026",
+        fileName: "layout-source-v2.zip",
+        status: "Pending Review",
+        grade: null,
+        feedback: "",
+        comments: "Attached is my zip containing the layout.js and sidebar collapsible components."
+      },
+      {
+        id: 2,
+        studentName: "John Smith",
+        courseId: "reactbasics",
+        course: "React Fundamental Course",
+        assignmentId: "reactbasics_a1",
+        assignment: "Module 1 Quiz: Hooks & Context API",
+        date: "Jul 27, 2026",
+        fileName: "react-quiz-answers.pdf",
+        status: "Graded",
+        grade: 92,
+        feedback: "Great work explaining context updates and handling cleanups in useEffect hook. Keep it up!",
+        comments: "Answers to the quiz questions in the PDF."
+      },
+      {
+        id: 3,
+        studentName: "Sarah Jenkins",
+        courseId: "nextjs15",
+        course: "Next.js 15 Masterclass",
+        assignmentId: "nextjs15_a1",
+        assignment: "Module 1: Server Actions & Form validation",
+        date: "Jul 25, 2026",
+        fileName: "form-action-submission.js",
+        status: "Pending Review",
+        grade: null,
+        feedback: "",
+        comments: "Finished the server actions with validation logic."
+      }
+    ];
+
+    if (savedSubmissions) {
+      setSubmissions(JSON.parse(savedSubmissions));
+    } else {
+      setSubmissions(defaultSubmissions);
+      localStorage.setItem("lms_submissions", JSON.stringify(defaultSubmissions));
+    }
+
+    // Sync state if updates are emitted in other pages
+    const syncSubmissions = () => {
+      const saved = localStorage.getItem("lms_submissions");
+      if (saved) {
+        setSubmissions(JSON.parse(saved));
+      }
+    };
+
+    window.addEventListener("lms_submissions_updated", syncSubmissions);
+    return () => {
+      window.removeEventListener("lms_submissions_updated", syncSubmissions);
+    };
+  }, []);
 
   const handleOpenGradeModal = (sub) => {
     setSelectedSub(sub);
@@ -56,18 +88,22 @@ export default function InstructorGradebook() {
   const handleSaveGrade = () => {
     if (!selectedSub || gradeInput === "") return;
 
-    setSubmissions((prev) =>
-      prev.map((s) =>
-        s.id === selectedSub.id
-          ? {
-              ...s,
-              status: "Graded",
-              grade: parseInt(gradeInput) || 0,
-              feedback: feedbackInput,
-            }
-          : s
-      )
+    const updated = submissions.map((s) =>
+      s.id === selectedSub.id
+        ? {
+            ...s,
+            status: "Graded",
+            grade: parseInt(gradeInput) || 0,
+            feedback: feedbackInput,
+          }
+        : s
     );
+
+    setSubmissions(updated);
+    localStorage.setItem("lms_submissions", JSON.stringify(updated));
+
+    // Dispatch custom event to notify other contexts
+    window.dispatchEvent(new Event("lms_submissions_updated"));
 
     setSelectedSub(null);
     setGradeInput("");

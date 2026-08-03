@@ -60,6 +60,12 @@ A modern, high-performance, and feature-rich Learning Management System (LMS) we
     - Implemented enrolled Student Course Console (`src/app/student/explore/[courseId]/page.js`) with interactive curriculum lesson navigation check-marks and tabs for Announcements, Info, and Reviews.
     - Updated Landing Page and Student Dashboard catalogs to support dynamic routing to Course details page.
 
+- **Module 3: Core Feature Extensions**
+  - **Day 1: Assignment & Progress UI** — *Completed*
+    - Built premium glassmorphic Student Assignments Console (`src/app/student/assignments/page.js`) supporting statistics metrics, status tab filters, and drag-and-drop submission modal with loading animation.
+    - Updated Student Sidebar Navigation Layout (`src/app/student/layout.js`) to expose the Assignments module console.
+    - Synchronized submissions state with Instructor Gradebook (`src/app/instructor/gradebook/page.js`) using local storage listeners to support live student-instructor dashboard updates.
+
 ---
 
 ## Getting Started
