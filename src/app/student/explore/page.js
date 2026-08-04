@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { coursesData } from "@/data/courses";
 
@@ -17,7 +17,7 @@ export default function ExploreCourses() {
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
 
   // Sync enrolled courses from localStorage
-  const syncEnrollments = () => {
+  const syncEnrollments = useCallback(() => {
     const saved = localStorage.getItem("lms_enrolled_courses");
     if (saved) {
       setEnrolledCourseIds(JSON.parse(saved));
@@ -27,17 +27,20 @@ export default function ExploreCourses() {
       localStorage.setItem("lms_enrolled_courses", JSON.stringify(initial));
       setEnrolledCourseIds(initial);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    syncEnrollments();
+    const timer = setTimeout(() => {
+      syncEnrollments();
+    }, 0);
 
     // Listen to custom updates (from details page)
     window.addEventListener("lms_enrollment_updated", syncEnrollments);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("lms_enrollment_updated", syncEnrollments);
     };
-  }, []);
+  }, [syncEnrollments]);
 
   const categories = ["All", "Development", "Design", "Data Science & AI", "Marketing"];
 
@@ -214,7 +217,7 @@ export default function ExploreCourses() {
           <div className="space-y-1">
             <h3 className="text-sm font-bold text-white">No courses matched your query</h3>
             <p className="text-slate-400 text-xs leading-relaxed">
-              We couldn't find any courses matching "{searchQuery}" in category "{selectedCategory}". Try updating your query or selecting another category.
+              We couldn&apos;t find any courses matching &quot;{searchQuery}&quot; in category &quot;{selectedCategory}&quot;. Try updating your query or selecting another category.
             </p>
           </div>
           <button

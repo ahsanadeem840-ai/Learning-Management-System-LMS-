@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { coursesData } from "@/data/courses";
@@ -16,24 +16,60 @@ export default function StudentCourseDetails({ params }) {
   const [enrolled, setEnrolled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [expandedModules, setExpandedModules] = useState({});
+  const [expandedModules, setExpandedModules] = useState({ 0: true });
+  const [completedLessons, setCompletedLessons] = useState([]);
 
-  // Fetch enrollment state from localStorage
+  // Fetch enrollment state & completed lessons from localStorage
+  const syncCompleted = useCallback(() => {
+    const saved = localStorage.getItem("lms_completed_lessons");
+    if (saved) {
+      const map = JSON.parse(saved);
+      setCompletedLessons(map[courseId] || []);
+    }
+  }, [courseId]);
+
   useEffect(() => {
     if (!course) return;
     document.title = `${course.title} | LMS Studio`;
 
-    const saved = localStorage.getItem("lms_enrolled_courses");
-    if (saved) {
-      const list = JSON.parse(saved);
-      if (list.includes(courseId)) {
-        setEnrolled(true);
+    const timer = setTimeout(() => {
+      const saved = localStorage.getItem("lms_enrolled_courses");
+      if (saved) {
+        const list = JSON.parse(saved);
+        if (list.includes(courseId)) {
+          setEnrolled(true);
+        }
       }
-    }
+      syncCompleted();
+    }, 0);
 
-    // Default expand first module
-    setExpandedModules({ 0: true });
-  }, [courseId, course]);
+
+
+    window.addEventListener("lms_progress_updated", syncCompleted);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("lms_progress_updated", syncCompleted);
+    };
+  }, [courseId, course, syncCompleted]);
+
+  const handleToggleLesson = (lessonTitle) => {
+    if (!enrolled) return;
+    const saved = localStorage.getItem("lms_completed_lessons");
+    const map = saved ? JSON.parse(saved) : {};
+    const current = map[courseId] || [];
+    let updated = [];
+    if (current.includes(lessonTitle)) {
+      updated = current.filter(t => t !== lessonTitle);
+    } else {
+      updated = [...current, lessonTitle];
+    }
+    map[courseId] = updated;
+    localStorage.setItem("lms_completed_lessons", JSON.stringify(map));
+    setCompletedLessons(updated);
+
+    // Dispatch progress updated event
+    window.dispatchEvent(new Event("lms_progress_updated"));
+  };
 
   if (!course) {
     return (
@@ -252,29 +288,51 @@ export default function StudentCourseDetails({ params }) {
                       }`}
                     >
                       <div className="divide-y divide-white/5">
-                        {module.lessons.map((lesson, lIdx) => (
-                          <div
-                            key={lIdx}
-                            className="p-4 flex items-center justify-between text-xs hover:bg-white/1.5 transition-colors gap-4"
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <span className="text-slate-500 shrink-0">
-                                📹
-                              </span>
-                              <span className="text-slate-300 font-medium truncate">
-                                {lesson.title}
-                              </span>
-                              {lesson.isPreview && (
-                                <span className="text-[8px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
-                                  Preview
+                        {module.lessons.map((lesson, lIdx) => {
+                          const isCompleted = completedLessons.includes(lesson.title);
+                          return (
+                            <div
+                              key={lIdx}
+                              onClick={() => enrolled && handleToggleLesson(lesson.title)}
+                              className={`p-4 flex items-center justify-between text-xs hover:bg-white/1.5 transition-colors gap-4 ${
+                                enrolled ? "cursor-pointer" : ""
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                {enrolled ? (
+                                  <div
+                                    className={`w-4.5 h-4.5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200 ${
+                                      isCompleted
+                                        ? "bg-indigo-600 border-indigo-600 text-white"
+                                        : "border-white/15 hover:border-white/30 bg-slate-950/40"
+                                    }`}
+                                  >
+                                    {isCompleted && (
+                                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-500 shrink-0">
+                                    📹
+                                  </span>
+                                )}
+                                <span className={`font-medium truncate ${enrolled && isCompleted ? "text-slate-400 line-through" : "text-slate-300"}`}>
+                                  {lesson.title}
                                 </span>
-                              )}
+                                {lesson.isPreview && (
+                                  <span className="text-[8px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
+                                    Preview
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-slate-500 font-mono text-[10px] shrink-0">
+                                {lesson.duration}
+                              </span>
                             </div>
-                            <span className="text-slate-500 font-mono text-[10px] shrink-0">
-                              {lesson.duration}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </div>

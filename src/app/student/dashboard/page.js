@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { coursesData } from "@/data/courses";
@@ -18,8 +18,15 @@ export default function StudentDashboard() {
   const [recommendedCourses, setRecommendedCourses] = useState([]);
   const [activeResume, setActiveResume] = useState(null);
   const [enrollSuccessMessage, setEnrollSuccessMessage] = useState("");
+  
+  // Dynamic stats states
+  const [studyMinutes, setStudyMinutes] = useState(180);
+  const [studyStreak, setStudyStreak] = useState(5);
+  const [overallCompletedCount, setOverallCompletedCount] = useState(4);
+  const [overallAvgGrade, setOverallAvgGrade] = useState(92);
 
-  const syncData = () => {
+  const syncData = useCallback(() => {
+    // 1. Enrolled courses
     const saved = localStorage.getItem("lms_enrolled_courses");
     let enrolledIds = [];
     if (saved) {
@@ -30,16 +37,30 @@ export default function StudentDashboard() {
     }
     setEnrolledCourseIds(enrolledIds);
 
+    // 2. Completed lessons map
+    const savedLessons = localStorage.getItem("lms_completed_lessons");
+    let completedLessonsMap = {};
+    if (savedLessons) {
+      completedLessonsMap = JSON.parse(savedLessons);
+    }
+
+    // Helpers to get course lesson counts and completed counts
+    const getCourseLessonsCount = (courseId) => {
+      const course = coursesData.find(c => c.id === courseId);
+      if (!course) return 10;
+      return course.syllabus ? course.syllabus.reduce((acc, mod) => acc + mod.lessons.length, 0) : 10;
+    };
+
+    const getCompletedLessonsCount = (courseId) => {
+      return completedLessonsMap[courseId] ? completedLessonsMap[courseId].length : 0;
+    };
+
     // Build active in-progress list
-    // Include initial default mock states or any new courses enrolled by user
     const baseInProgress = [
       {
         id: "nextjs15",
         title: "Next.js 15 Masterclass: App Router & Server Actions",
         instructor: "Alex Rivers",
-        progress: 75,
-        completedLessons: 15,
-        totalLessons: 20,
         category: "Development",
         themeColor: "from-indigo-500 to-purple-600 shadow-indigo-500/10",
         accentBg: "bg-indigo-500/20 text-indigo-400",
@@ -48,28 +69,40 @@ export default function StudentDashboard() {
         id: "uiuxfigma",
         title: "UI/UX Design Systems with Figma: Scalable & Modern",
         instructor: "Marcus Vance",
-        progress: 40,
-        completedLessons: 8,
-        totalLessons: 20,
         category: "Design",
         themeColor: "from-purple-500 to-pink-600 shadow-purple-500/10",
         accentBg: "bg-purple-500/20 text-purple-400",
       },
     ];
 
-    // Check if there are other courses in enrolledIds not in baseInProgress
-    const list = [...baseInProgress];
+    // Compute progress dynamically
+    const computedInProgress = baseInProgress.map(c => {
+      const total = getCourseLessonsCount(c.id);
+      const completed = getCompletedLessonsCount(c.id);
+      const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+      return {
+        ...c,
+        completedLessons: completed,
+        totalLessons: total,
+        progress: progress
+      };
+    });
+
+    const list = [...computedInProgress];
     enrolledIds.forEach((id) => {
       if (!list.some((c) => c.id === id)) {
         const fullCourse = coursesData.find((c) => c.id === id);
         if (fullCourse) {
+          const total = getCourseLessonsCount(id);
+          const completed = getCompletedLessonsCount(id);
+          const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
           list.unshift({
             id: fullCourse.id,
             title: fullCourse.title,
             instructor: fullCourse.instructor,
-            progress: 0,
-            completedLessons: 0,
-            totalLessons: fullCourse.syllabus ? fullCourse.syllabus.reduce((acc, mod) => acc + mod.lessons.length, 0) : 10,
+            progress: progress,
+            completedLessons: completed,
+            totalLessons: total,
             category: fullCourse.category,
             themeColor: "from-blue-500 to-indigo-600 shadow-blue-500/10",
             accentBg: "bg-blue-500/20 text-indigo-400",
@@ -79,10 +112,10 @@ export default function StudentDashboard() {
     });
     setInProgressCourses(list);
 
-    // Recommended list is anything from coursesData that is NOT in enrolled list
+    // 3. Recommended list
     const recom = coursesData
       .filter((c) => !enrolledIds.includes(c.id))
-      .slice(0, 3) // pick top 3
+      .slice(0, 3)
       .map((c) => ({
         id: c.id,
         title: c.title,
@@ -98,17 +131,49 @@ export default function StudentDashboard() {
         enrolled: false,
       }));
     setRecommendedCourses(recom);
-  };
+
+    // 4. Study minutes & streak
+    const savedMinutes = localStorage.getItem("lms_study_time");
+    if (savedMinutes) {
+      setStudyMinutes(parseInt(savedMinutes));
+    }
+    const savedStreak = localStorage.getItem("lms_study_streak");
+    if (savedStreak) {
+      setStudyStreak(parseInt(savedStreak));
+    }
+
+    // 5. Completed courses count (dynamically check enrolled courses at 100%, + 2 default completed ones)
+    const completedEnrolledCount = list.filter(c => c.progress === 100).length;
+    setOverallCompletedCount(completedEnrolledCount + 2);
+
+    // 6. Submissions average quiz score
+    const savedSubmissions = localStorage.getItem("lms_submissions");
+    if (savedSubmissions) {
+      const subs = JSON.parse(savedSubmissions);
+      const ahsanGrades = subs.filter(s => s.studentName === "Ahsan Adeem" && s.status === "Graded" && s.grade !== null);
+      if (ahsanGrades.length > 0) {
+        const avg = Math.round(ahsanGrades.reduce((acc, curr) => acc + curr.grade, 0) / ahsanGrades.length);
+        setOverallAvgGrade(avg);
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    syncData();
+    const timer = setTimeout(() => {
+      syncData();
+    }, 0);
 
     // Listen to custom updates
     window.addEventListener("lms_enrollment_updated", syncData);
+    window.addEventListener("lms_progress_updated", syncData);
+    window.addEventListener("lms_submissions_updated", syncData);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("lms_enrollment_updated", syncData);
+      window.removeEventListener("lms_progress_updated", syncData);
+      window.removeEventListener("lms_submissions_updated", syncData);
     };
-  }, []);
+  }, [syncData]);
 
   const handleResumeCourse = (courseTitle) => {
     setActiveResume(courseTitle);
@@ -152,7 +217,7 @@ export default function StudentDashboard() {
       {activeResume && (
         <div className="fixed bottom-6 right-6 z-50 glass-panel border-indigo-500/30 bg-indigo-950/80 text-indigo-200 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-lg shadow-indigo-500/10 animate-slide-up">
           <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-semibold">Resuming lesson for "{activeResume}"...</span>
+          <span className="text-xs font-semibold">Resuming lesson for &quot;{activeResume}&quot;...</span>
         </div>
       )}
 
@@ -172,7 +237,7 @@ export default function StudentDashboard() {
               Welcome Back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">Ahsan Adeem</span>!
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm max-w-lg leading-relaxed mt-1">
-              "Education is the passport to the future, for tomorrow belongs to those who prepare for it today." Keep expanding your boundaries!
+              &quot;Education is the passport to the future, for tomorrow belongs to those who prepare for it today.&quot; Keep expanding your boundaries!
             </p>
           </div>
 
@@ -187,7 +252,7 @@ export default function StudentDashboard() {
               </div>
               <div>
                 <div className="text-[10px] text-slate-500 font-bold uppercase leading-none">Learning Streak</div>
-                <div className="text-sm font-black text-slate-200 mt-1">5 Days In a Row</div>
+                <div className="text-sm font-black text-slate-200 mt-1">{studyStreak} Days In a Row</div>
               </div>
             </div>
 
@@ -201,7 +266,7 @@ export default function StudentDashboard() {
               </div>
               <div>
                 <div className="text-[10px] text-slate-500 font-bold uppercase leading-none">Time Spent (This Week)</div>
-                <div className="text-sm font-black text-slate-200 mt-1">180 / 300 mins</div>
+                <div className="text-sm font-black text-slate-200 mt-1">{studyMinutes} / 300 mins</div>
               </div>
             </div>
           </div>
@@ -224,7 +289,7 @@ export default function StudentDashboard() {
                   </div>
                   <span className="text-xs font-semibold text-slate-300">Completed Courses</span>
                 </div>
-                <span className="text-sm font-black text-white">4</span>
+                <span className="text-sm font-black text-white">{overallCompletedCount}</span>
               </div>
 
               {/* Stat 2 */}
@@ -246,7 +311,7 @@ export default function StudentDashboard() {
                   </div>
                   <span className="text-xs font-semibold text-slate-300">Avg Quiz Score</span>
                 </div>
-                <span className="text-sm font-black text-white">92%</span>
+                <span className="text-sm font-black text-white">{overallAvgGrade}%</span>
               </div>
             </div>
           </div>

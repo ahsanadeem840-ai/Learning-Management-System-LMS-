@@ -1,67 +1,133 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { coursesData } from "@/data/courses";
 
 export default function MyLearning() {
-  useEffect(() => {
-    document.title = "My Learning | LMS Studio";
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+  const [inProgressCourses, setInProgressCourses] = useState([]);
+  const [completedCourses, setCompletedCourses] = useState([]);
+  const [activeResume, setActiveResume] = useState(null);
+  const [activeTab, setActiveTab] = useState("in-progress");
+
+  const syncData = useCallback(() => {
+    const saved = localStorage.getItem("lms_enrolled_courses");
+    let enrolledIds = saved ? JSON.parse(saved) : ["nextjs15", "uiuxfigma"];
+    setEnrolledCourseIds(enrolledIds);
+
+    const savedCompleted = localStorage.getItem("lms_completed_lessons");
+    let completedLessonsMap = savedCompleted ? JSON.parse(savedCompleted) : {};
+
+    const getCourseLessonsCount = (courseId) => {
+      const course = coursesData.find(c => c.id === courseId);
+      if (!course) return 10;
+      return course.syllabus ? course.syllabus.reduce((acc, mod) => acc + mod.lessons.length, 0) : 10;
+    };
+
+    const getCompletedLessonsCount = (courseId) => {
+      return completedLessonsMap[courseId] ? completedLessonsMap[courseId].length : 0;
+    };
+
+    // Base properties for styling
+    const courseThemes = {
+      nextjs15: {
+        themeColor: "from-indigo-500 to-purple-600 shadow-indigo-500/10",
+        accentBg: "bg-indigo-500/20 text-indigo-400"
+      },
+      uiuxfigma: {
+        themeColor: "from-purple-500 to-pink-600 shadow-purple-500/10",
+        accentBg: "bg-purple-500/20 text-purple-400"
+      },
+      introai: {
+        themeColor: "from-blue-500 to-indigo-600 shadow-blue-500/10",
+        accentBg: "bg-blue-500/20 text-indigo-400"
+      }
+    };
+
+    const defaultTheme = {
+      themeColor: "from-emerald-500 to-teal-600 shadow-emerald-500/10",
+      accentBg: "bg-emerald-500/20 text-emerald-400"
+    };
+
+    const inProg = [];
+    const comp = [
+      // Seed default static completed courses
+      {
+        id: "reactbasics",
+        title: "React Fundamental Course: Hooks, State, and Context",
+        instructor: "Maximilian Schwarz",
+        progress: 100,
+        completedLessons: 15,
+        totalLessons: 15,
+        category: "Development",
+        completedDate: "June 12, 2026",
+        themeColor: "from-emerald-500 to-teal-600 shadow-emerald-500/10",
+        accentBg: "bg-emerald-500/20 text-emerald-400",
+      },
+      {
+        id: "modernjs",
+        title: "Modern JavaScript: ES6+ Syntax & Functional Programming",
+        instructor: "Brad Traversy",
+        progress: 100,
+        completedLessons: 12,
+        totalLessons: 12,
+        category: "Development",
+        completedDate: "May 28, 2026",
+        themeColor: "from-emerald-500 to-teal-600 shadow-emerald-500/10",
+        accentBg: "bg-emerald-500/20 text-emerald-400",
+      }
+    ];
+
+    enrolledIds.forEach(id => {
+      const course = coursesData.find(c => c.id === id);
+      if (course) {
+        const total = getCourseLessonsCount(id);
+        const completed = getCompletedLessonsCount(id);
+        const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+        const theme = courseThemes[id] || defaultTheme;
+
+        const mappedCourse = {
+          id: course.id,
+          title: course.title,
+          instructor: course.instructor,
+          progress: progress,
+          completedLessons: completed,
+          totalLessons: total,
+          category: course.category,
+          themeColor: theme.themeColor,
+          accentBg: theme.accentBg
+        };
+
+        if (progress === 100) {
+          comp.push({
+            ...mappedCourse,
+            completedDate: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+          });
+        } else {
+          inProg.push(mappedCourse);
+        }
+      }
+    });
+
+    setInProgressCourses(inProg);
+    setCompletedCourses(comp);
   }, []);
 
-  const [activeTab, setActiveTab] = useState("in-progress");
-  const [activeResume, setActiveResume] = useState(null);
+  useEffect(() => {
+    document.title = "My Learning | LMS Studio";
+    const timer = setTimeout(() => {
+      syncData();
+    }, 0);
 
-  const inProgressCourses = [
-    {
-      id: "nextjs15",
-      title: "Next.js 15 Masterclass: App Router & Server Actions",
-      instructor: "Alex Rivers",
-      progress: 75,
-      completedLessons: 15,
-      totalLessons: 20,
-      category: "Development",
-      themeColor: "from-indigo-500 to-purple-600 shadow-indigo-500/10",
-      accentBg: "bg-indigo-500/20 text-indigo-400",
-    },
-    {
-      id: "uiuxfigma",
-      title: "UI/UX Design Systems with Figma: Scalable & Modern",
-      instructor: "Marcus Vance",
-      progress: 40,
-      completedLessons: 8,
-      totalLessons: 20,
-      category: "Design",
-      themeColor: "from-purple-500 to-pink-600 shadow-purple-500/10",
-      accentBg: "bg-purple-500/20 text-purple-400",
-    },
-  ];
-
-  const completedCourses = [
-    {
-      id: "reactbasics",
-      title: "React Fundamental Course: Hooks, State, and Context",
-      instructor: "Maximilian Schwarz",
-      progress: 100,
-      completedLessons: 15,
-      totalLessons: 15,
-      category: "Development",
-      completedDate: "June 12, 2026",
-      themeColor: "from-emerald-500 to-teal-600 shadow-emerald-500/10",
-      accentBg: "bg-emerald-500/20 text-emerald-400",
-    },
-    {
-      id: "modernjs",
-      title: "Modern JavaScript: ES6+ Syntax & Functional Programming",
-      instructor: "Brad Traversy",
-      progress: 100,
-      completedLessons: 12,
-      totalLessons: 12,
-      category: "Development",
-      completedDate: "May 28, 2026",
-      themeColor: "from-emerald-500 to-teal-600 shadow-emerald-500/10",
-      accentBg: "bg-emerald-500/20 text-emerald-400",
-    },
-  ];
+    window.addEventListener("lms_progress_updated", syncData);
+    window.addEventListener("lms_enrollment_updated", syncData);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("lms_progress_updated", syncData);
+      window.removeEventListener("lms_enrollment_updated", syncData);
+    };
+  }, [syncData]);
 
   const handleResumeCourse = (courseTitle) => {
     setActiveResume(courseTitle);
@@ -76,7 +142,7 @@ export default function MyLearning() {
       {activeResume && (
         <div className="fixed bottom-6 right-6 z-50 glass-panel border-indigo-500/30 bg-indigo-950/80 text-indigo-200 px-5 py-3 rounded-2xl flex items-center gap-3 shadow-lg shadow-indigo-500/10 animate-slide-up">
           <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-semibold">Resuming lesson for "{activeResume}"...</span>
+          <span className="text-xs font-semibold">Resuming lesson for &quot;{activeResume}&quot;...</span>
         </div>
       )}
 
