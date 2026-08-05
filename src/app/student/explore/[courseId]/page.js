@@ -4,6 +4,9 @@ import { useState, useEffect, use, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { coursesData } from "@/data/courses";
+import { quizzesData } from "@/data/quizzes";
+import QuizPlayer from "@/components/QuizPlayer";
+
 
 export default function StudentCourseDetails({ params }) {
   const resolvedParams = use(params);
@@ -52,6 +55,8 @@ export default function StudentCourseDetails({ params }) {
     };
   }, [courseId, course, syncCompleted]);
 
+  const [activeQuiz, setActiveQuiz] = useState(null);
+
   const handleToggleLesson = (lessonTitle) => {
     if (!enrolled) return;
     const saved = localStorage.getItem("lms_completed_lessons");
@@ -69,6 +74,63 @@ export default function StudentCourseDetails({ params }) {
 
     // Dispatch progress updated event
     window.dispatchEvent(new Event("lms_progress_updated"));
+  };
+
+  const handleLessonAction = (lessonTitle) => {
+    if (!enrolled) return;
+    const quizKey = Object.keys(quizzesData).find(
+      (k) => quizzesData[k].courseId === courseId && quizzesData[k].lessonTitle === lessonTitle
+    );
+
+    if (quizKey) {
+      setActiveQuiz(quizzesData[quizKey]);
+    } else {
+      handleToggleLesson(lessonTitle);
+    }
+  };
+
+  const handleQuizComplete = (scorePercent, isPassed) => {
+    if (isPassed) {
+      const saved = localStorage.getItem("lms_completed_lessons");
+      const map = saved ? JSON.parse(saved) : {};
+      const current = map[courseId] || [];
+      if (!current.includes(activeQuiz.lessonTitle)) {
+        const updated = [...current, activeQuiz.lessonTitle];
+        map[courseId] = updated;
+        localStorage.setItem("lms_completed_lessons", JSON.stringify(map));
+        setCompletedLessons(updated);
+      }
+      
+      // Dispatch progress updated event
+      window.dispatchEvent(new Event("lms_progress_updated"));
+    }
+
+    // Save quiz grade results to localStorage for dashboard metrics & AssignmentsConsole
+    const savedSubs = localStorage.getItem("lms_submissions");
+    let submissions = savedSubs ? JSON.parse(savedSubs) : [];
+    const newSubmission = {
+      id: Date.now(),
+      studentName: "Ahsan Adeem",
+      courseId: courseId,
+      course: course.title,
+      assignmentId: activeQuiz.title.replace(/\s+/g, "_").toLowerCase(),
+      assignment: activeQuiz.lessonTitle,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      fileName: "online-quiz-assessment",
+      status: "Graded",
+      grade: scorePercent,
+      feedback: isPassed ? "Congratulations on passing the module assessment!" : "Keep practicing, review course contents, and try again.",
+      comments: `Scored ${scorePercent}% on the online assessment.`
+    };
+
+    // Filter out previous attempts for the same quiz
+    submissions = submissions.filter(s => s.studentName !== "Ahsan Adeem" || s.assignment !== activeQuiz.lessonTitle);
+    submissions.push(newSubmission);
+    localStorage.setItem("lms_submissions", JSON.stringify(submissions));
+    window.dispatchEvent(new Event("lms_submissions_updated"));
+
+    // Close the quiz player
+    setActiveQuiz(null);
   };
 
   if (!course) {
@@ -290,16 +352,23 @@ export default function StudentCourseDetails({ params }) {
                       <div className="divide-y divide-white/5">
                         {module.lessons.map((lesson, lIdx) => {
                           const isCompleted = completedLessons.includes(lesson.title);
+                          const isQuiz = Object.keys(quizzesData).some(
+                            (k) => quizzesData[k].courseId === courseId && quizzesData[k].lessonTitle === lesson.title
+                          );
                           return (
                             <div
                               key={lIdx}
-                              onClick={() => enrolled && handleToggleLesson(lesson.title)}
+                              onClick={() => enrolled && handleLessonAction(lesson.title)}
                               className={`p-4 flex items-center justify-between text-xs hover:bg-white/1.5 transition-colors gap-4 ${
                                 enrolled ? "cursor-pointer" : ""
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                {enrolled ? (
+                                {isQuiz ? (
+                                  <span className="text-slate-400 shrink-0 text-sm">
+                                    {isCompleted ? "✅" : "📝"}
+                                  </span>
+                                ) : enrolled ? (
                                   <div
                                     className={`w-4.5 h-4.5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200 ${
                                       isCompleted
@@ -318,10 +387,22 @@ export default function StudentCourseDetails({ params }) {
                                     📹
                                   </span>
                                 )}
-                                <span className={`font-medium truncate ${enrolled && isCompleted ? "text-slate-400 line-through" : "text-slate-300"}`}>
+                                
+                                <span className={`font-medium truncate ${enrolled && isCompleted ? (isQuiz ? "text-emerald-450 font-bold" : "text-slate-400 line-through") : "text-slate-300"}`}>
                                   {lesson.title}
                                 </span>
-                                {lesson.isPreview && (
+                                
+                                {isQuiz && (
+                                  <span className={`text-[8px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 ${
+                                    isCompleted 
+                                      ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" 
+                                      : "bg-indigo-500/10 border border-indigo-500/20 text-indigo-400"
+                                  }`}>
+                                    {isCompleted ? "Passed" : "Quiz Assessment"}
+                                  </span>
+                                )}
+                                
+                                {lesson.isPreview && !isQuiz && (
                                   <span className="text-[8px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0">
                                     Preview
                                   </span>
@@ -464,6 +545,13 @@ export default function StudentCourseDetails({ params }) {
           </div>
         </div>
       </div>
+      {activeQuiz && (
+        <QuizPlayer
+          quiz={activeQuiz}
+          onClose={() => setActiveQuiz(null)}
+          onComplete={handleQuizComplete}
+        />
+      )}
     </div>
   );
 }

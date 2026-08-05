@@ -175,11 +175,8 @@ export default function StudentDashboard() {
     };
   }, [syncData]);
 
-  const handleResumeCourse = (courseTitle) => {
-    setActiveResume(courseTitle);
-    setTimeout(() => {
-      setActiveResume(null);
-    }, 3000);
+  const handleResumeCourse = (courseId) => {
+    router.push(`/student/explore/${courseId}`);
   };
 
   const handleEnrollCourse = (courseId, courseTitle) => {
@@ -374,7 +371,7 @@ export default function StudentDashboard() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleResumeCourse(course.title);
+                      handleResumeCourse(course.id);
                     }}
                     className="flex items-center gap-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white py-2 px-4 rounded-xl shadow-md shadow-indigo-500/10 hover:shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >

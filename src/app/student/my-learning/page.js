@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { coursesData } from "@/data/courses";
 
 export default function MyLearning() {
+  const router = useRouter();
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
   const [inProgressCourses, setInProgressCourses] = useState([]);
   const [completedCourses, setCompletedCourses] = useState([]);
@@ -129,11 +131,8 @@ export default function MyLearning() {
     };
   }, [syncData]);
 
-  const handleResumeCourse = (courseTitle) => {
-    setActiveResume(courseTitle);
-    setTimeout(() => {
-      setActiveResume(null);
-    }, 3000);
+  const handleResumeCourse = (courseId) => {
+    router.push(`/student/explore/${courseId}`);
   };
 
   return (
@@ -224,7 +223,7 @@ export default function MyLearning() {
 
               <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-end">
                 <button
-                  onClick={() => handleResumeCourse(course.title)}
+                  onClick={() => handleResumeCourse(course.id)}
                   className="flex items-center gap-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white py-2 px-4 rounded-xl shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">

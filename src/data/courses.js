@@ -97,7 +97,8 @@ export const coursesData = [
         lessons: [
           { title: "Linear Algebra Refresher: Tensors & Dot Products", duration: "45:30", isPreview: true },
           { title: "Calculus & Partial Derivatives Demystified", duration: "55:10", isPreview: true },
-          { title: "Probability & Cross-Entropy Loss Functions", duration: "32:45" }
+          { title: "Probability & Cross-Entropy Loss Functions", duration: "32:45" },
+          { title: "Module 1 Mathematics Quiz & Assessment", duration: "20:00" }
         ]
       },
       {
@@ -150,7 +151,8 @@ export const coursesData = [
         lessons: [
           { title: "Visual Hierarchy, Alignment, & Spacing", duration: "25:40", isPreview: true },
           { title: "Typography Hierarchies & HSL Color Palettes", duration: "38:15", isPreview: true },
-          { title: "Understanding Cognitive Load & Usability Rules", duration: "32:45" }
+          { title: "Understanding Cognitive Load & Usability Rules", duration: "32:45" },
+          { title: "Module 1 UX Principles Quiz & Assessment", duration: "15:00" }
         ]
       },
       {
