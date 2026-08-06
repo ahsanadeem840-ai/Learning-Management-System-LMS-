@@ -256,7 +256,7 @@ export default function ProgressDashboard() {
   const courseCompletionRate = totalEnrolled > 0 ? Math.round((completedCoursesCount / totalEnrolled) * 100) : 0;
   
   // Submissions stats
-  const ahsanSubs = submissions.filter(s => s.studentName === "Ahsan Adeem");
+  const ahsanSubs = submissions.filter(s => s.studentName === "Muhammad Ahsan");
   const gradedSubs = ahsanSubs.filter(s => s.status === "Graded" && s.grade !== null);
   const averageGrade = gradedSubs.length > 0
     ? Math.round(gradedSubs.reduce((acc, curr) => acc + curr.grade, 0) / gradedSubs.length)

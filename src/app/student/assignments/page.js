@@ -68,7 +68,7 @@ const ASSIGNMENTS_DB = [
 const DEFAULT_SUBMISSIONS = [
   {
     id: 1,
-    studentName: "Ahsan Adeem",
+    studentName: "Muhammad Ahsan",
     courseId: "nextjs15",
     course: "Next.js 15 Masterclass: App Router & Server Actions",
     assignmentId: "nextjs15_a2",
@@ -155,10 +155,10 @@ export default function StudentAssignments() {
       enrolledCourseIds.includes(asg.courseId)
     );
 
-    // Map each assignment to include its current submission status for Ahsan Adeem
+    // Map each assignment to include its current submission status for Muhammad Ahsan
     const mapped = studentAssignments.map(asg => {
       const submission = submissions.find(sub => 
-        sub.studentName === "Ahsan Adeem" && sub.assignmentId === asg.id
+        sub.studentName === "Muhammad Ahsan" && sub.assignmentId === asg.id
       );
 
       if (submission) {
@@ -199,7 +199,7 @@ export default function StudentAssignments() {
 
   // Statistics Calculation
   const totalAsgsCount = ASSIGNMENTS_DB.filter(asg => enrolledCourseIds.includes(asg.courseId)).length;
-  const ahsanSubs = submissions.filter(s => s.studentName === "Ahsan Adeem" && enrolledCourseIds.includes(s.courseId));
+  const ahsanSubs = submissions.filter(s => s.studentName === "Muhammad Ahsan" && enrolledCourseIds.includes(s.courseId));
   const submittedCount = ahsanSubs.filter(s => s.status === "Pending Review").length;
   const gradedCount = ahsanSubs.filter(s => s.status === "Graded").length;
   const pendingCount = totalAsgsCount - submittedCount - gradedCount;
@@ -265,7 +265,7 @@ export default function StudentAssignments() {
           // Finalize submission
           const newSubmission = {
             id: Date.now(),
-            studentName: "Ahsan Adeem",
+            studentName: "Muhammad Ahsan",
             courseId: selectedAssignment.courseId,
             course: selectedAssignment.courseTitle,
             assignmentId: selectedAssignment.id,

@@ -174,10 +174,10 @@ export default function StudentLayout({ children }) {
             className="flex items-center gap-2.5 p-1 px-2 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all text-left"
           >
             <div className="w-7.5 h-7.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white uppercase shadow-md shadow-indigo-500/20">
-              AA
+              MA
             </div>
             <div className="hidden lg:block text-xs leading-none">
-              <div className="font-bold text-slate-200">Ahsan Adeem</div>
+              <div className="font-bold text-slate-200">Muhammad Ahsan</div>
               <div className="text-[10px] text-slate-500 mt-0.5">Student</div>
             </div>
             <svg className="w-4 h-4 text-slate-400 hidden lg:block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@ export default function StudentLayout({ children }) {
           {showProfileMenu && (
             <div className="absolute right-0 mt-2.5 w-52 glass-panel rounded-2xl p-2.5 z-50 animate-fade-in">
               <div className="px-3.5 py-2 border-b border-white/5 text-xs lg:hidden">
-                <div className="font-bold text-slate-200">Ahsan Adeem</div>
+                <div className="font-bold text-slate-200">Muhammad Ahsan</div>
                 <div className="text-[10px] text-slate-500 mt-0.5">ahsanadeem840@gmail.com</div>
               </div>
               <div className="space-y-1 py-1">
@@ -282,11 +282,11 @@ export default function StudentLayout({ children }) {
         <div className="p-4 border-t border-white/5 shrink-0">
           <div className={`flex items-center gap-3 ${isCollapsed ? "justify-center" : "bg-white/5 border border-white/5 rounded-2xl p-3"}`}>
             <div className="w-8.5 h-8.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white uppercase shrink-0">
-              AA
+              MA
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0 animate-fade-in">
-                <div className="text-xs font-bold text-white truncate">Ahsan Adeem</div>
+                <div className="text-xs font-bold text-white truncate">Muhammad Ahsan</div>
                 <div className="text-[9px] text-slate-500 truncate mt-0.5">ahsanadeem840@gmail.com</div>
               </div>
             )}
@@ -346,10 +346,10 @@ export default function StudentLayout({ children }) {
             <div className="border-t border-white/5 pt-4 mt-auto">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white uppercase">
-                  AA
+                  MA
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white">Ahsan Adeem</div>
+                  <div className="text-xs font-bold text-white">Muhammad Ahsan</div>
                   <div className="text-[10px] text-slate-500">ahsanadeem840@gmail.com</div>
                 </div>
               </div>

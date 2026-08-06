@@ -110,7 +110,7 @@ export default function StudentCourseDetails({ params }) {
     let submissions = savedSubs ? JSON.parse(savedSubs) : [];
     const newSubmission = {
       id: Date.now(),
-      studentName: "Ahsan Adeem",
+      studentName: "Muhammad Ahsan",
       courseId: courseId,
       course: course.title,
       assignmentId: activeQuiz.title.replace(/\s+/g, "_").toLowerCase(),
@@ -124,7 +124,7 @@ export default function StudentCourseDetails({ params }) {
     };
 
     // Filter out previous attempts for the same quiz
-    submissions = submissions.filter(s => s.studentName !== "Ahsan Adeem" || s.assignment !== activeQuiz.lessonTitle);
+    submissions = submissions.filter(s => s.studentName !== "Muhammad Ahsan" || s.assignment !== activeQuiz.lessonTitle);
     submissions.push(newSubmission);
     localStorage.setItem("lms_submissions", JSON.stringify(submissions));
     window.dispatchEvent(new Event("lms_submissions_updated"));

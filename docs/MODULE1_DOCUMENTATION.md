@@ -5,7 +5,7 @@ This document compiles the work completed during **Module 1** (Day 1 to Day 5) o
 ---
 
 ## 📋 Portfolio Overview
-- **Student / Intern Name:** Ahsan Adeem
+- **Student / Intern Name:** Muhammad Ahsan
 - **Email:** ahsanadeem840@gmail.com
 - **Program:** Frontend Web Development / Next.js React Developer
 - **Milestone:** Module 1 Submission (Requirements, UX Wireframes, and Next.js Scaffolding)

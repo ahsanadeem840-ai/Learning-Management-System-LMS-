@@ -117,7 +117,7 @@ export default function CertificatesBoard() {
 
               <div className="space-y-2">
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
-                  Ahsan Adeem
+                  Muhammad Ahsan
                 </h2>
                 <div className="w-16 h-0.5 bg-indigo-500 mx-auto rounded-full" />
               </div>

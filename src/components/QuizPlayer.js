@@ -544,21 +544,38 @@ export default function QuizPlayer({ quiz, onClose, onComplete }) {
             
             {/* Summary Banner */}
             <div className="text-center space-y-4 pt-4 relative">
-              <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center border-4 relative z-10 animate-scale-up">
-                {scoreStats.passed ? (
-                  // Passed Ring
-                  <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 shadow-lg shadow-emerald-500/20 animate-ping" />
-                ) : (
-                  // Failed Ring
-                  <div className="absolute inset-0 rounded-full border-4 border-red-500/20 shadow-lg shadow-red-500/20" />
+              <div className="relative w-28 h-28 mx-auto flex items-center justify-center animate-scale-up z-10">
+                {scoreStats.passed && (
+                  <div className="absolute inset-2 rounded-full border border-emerald-500/25 shadow-lg shadow-emerald-500/25 animate-ping" />
                 )}
-                
-                <div className={`w-full h-full rounded-full flex items-center justify-center text-3xl ${
-                  scoreStats.passed 
-                    ? "bg-emerald-950/80 border-emerald-500 text-emerald-400" 
-                    : "bg-red-950/80 border-red-500 text-red-400"
-                }`}>
-                  {scoreStats.passed ? "🏆" : "❌"}
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="34"
+                    className="stroke-slate-800/80"
+                    strokeWidth="5"
+                    fill="transparent"
+                  />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="34"
+                    className={`${scoreStats.passed ? "stroke-emerald-500" : "stroke-red-500"} transition-all duration-1000 ease-out`}
+                    strokeWidth="5"
+                    fill="transparent"
+                    strokeDasharray="213.6"
+                    strokeDashoffset={213.6 - (213.6 * scoreStats.percent) / 100}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-black text-white tracking-tight">{scoreStats.percent}%</span>
+                  <span className={`text-[8px] font-extrabold uppercase tracking-wider ${
+                    scoreStats.passed ? "text-emerald-400" : "text-red-400"
+                  }`}>
+                    {scoreStats.passed ? "Passed" : "Failed"}
+                  </span>
                 </div>
               </div>
 

@@ -12,7 +12,7 @@ export default function AdminDashboard() {
     {
       id: 1,
       type: "User Signup",
-      detail: "New Student (Ahsan Adeem) completed registration form.",
+      detail: "New Student (Muhammad Ahsan) completed registration form.",
       timestamp: "10 mins ago",
       badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/10",
     },

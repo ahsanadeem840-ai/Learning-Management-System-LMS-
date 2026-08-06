@@ -150,7 +150,7 @@ export default function StudentDashboard() {
     const savedSubmissions = localStorage.getItem("lms_submissions");
     if (savedSubmissions) {
       const subs = JSON.parse(savedSubmissions);
-      const ahsanGrades = subs.filter(s => s.studentName === "Ahsan Adeem" && s.status === "Graded" && s.grade !== null);
+      const ahsanGrades = subs.filter(s => s.studentName === "Muhammad Ahsan" && s.status === "Graded" && s.grade !== null);
       if (ahsanGrades.length > 0) {
         const avg = Math.round(ahsanGrades.reduce((acc, curr) => acc + curr.grade, 0) / ahsanGrades.length);
         setOverallAvgGrade(avg);
@@ -231,7 +231,7 @@ export default function StudentDashboard() {
               ✨ Module 2 Day 3
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-              Welcome Back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">Ahsan Adeem</span>!
+              Welcome Back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">Muhammad Ahsan</span>!
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm max-w-lg leading-relaxed mt-1">
               &quot;Education is the passport to the future, for tomorrow belongs to those who prepare for it today.&quot; Keep expanding your boundaries!

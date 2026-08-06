@@ -16,7 +16,7 @@ export default function InstructorGradebook() {
     const defaultSubmissions = [
       {
         id: 1,
-        studentName: "Ahsan Adeem",
+        studentName: "Muhammad Ahsan",
         courseId: "nextjs15",
         course: "Next.js 15 Masterclass",
         assignmentId: "nextjs15_a2",

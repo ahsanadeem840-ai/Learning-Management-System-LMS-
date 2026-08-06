@@ -8,7 +8,7 @@ export default function StudentProfile() {
   }, []);
 
   const [formData, setFormData] = useState({
-    name: "Ahsan Adeem",
+    name: "Muhammad Ahsan",
     email: "ahsanadeem840@gmail.com",
     bio: "Passionate web developer specializing in Next.js, React, and modern UI design frameworks.",
     skills: "React, Next.js, Tailwind CSS, JavaScript",

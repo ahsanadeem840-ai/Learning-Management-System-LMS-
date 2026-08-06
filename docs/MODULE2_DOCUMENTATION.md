@@ -5,7 +5,7 @@ This document compiles the work completed during **Module 2** (Core Feature Impl
 ---
 
 ## 📋 Portfolio Overview
-- **Student / Intern Name:** Ahsan Adeem
+- **Student / Intern Name:** Muhammad Ahsan
 - **Email:** ahsanadeem840@gmail.com
 - **Program:** Frontend Web Development / Next.js React Developer
 - **Milestone:** Module 2 - Core Feature Implementation (Day 1, Day 2 & Day 3: Auth UI, Dedicated Signup, and Student Dashboard)
@@ -88,7 +88,7 @@ We designed and implemented a dedicated registration console under `/signup` to 
 We implemented a premium glassmorphic Student Dashboard console and connected the navigation layout to prevent any 404 routing errors.
 
 ### Welcome Banner & Stats Grid
-- **Personalized Header**: Greets the logged-in student (e.g. "Welcome Back, Ahsan Adeem!") inside a translucent container with organic glowing background elements.
+- **Personalized Header**: Greets the logged-in student (e.g. "Welcome Back, Muhammad Ahsan!") inside a translucent container with organic glowing background elements.
 - **Micro-Metrics**: Tracks active learning streak (5 Days) and weekly time commitment (180 mins spent) with rich responsive layouts.
 - **Key Statistics Cards**: Displays overall completions, total credentials claimed, and average assessment scores.
 
