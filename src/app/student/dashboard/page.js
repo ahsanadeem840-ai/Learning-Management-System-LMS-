@@ -9,6 +9,7 @@ import { getCourses, getUserStats, updateUserStats, getSubmissions, getUserCompl
 export default function StudentDashboard() {
   const router = useRouter();
   const { user, userData } = useAuth();
+  const displayName = userData?.name || user?.displayName || "Student";
 
   // Set page title
   useEffect(() => {
