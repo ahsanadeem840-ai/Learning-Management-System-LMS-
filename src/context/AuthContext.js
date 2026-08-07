@@ -139,17 +139,44 @@ export function AuthProvider({ children }) {
     try {
       if (!isFirebaseConfigured) {
         // Mock login
-        // Check if there's a registered mock user, otherwise seed a default one
-        const mockUser = {
-          uid: "mock_uid_12345",
-          name: email.toLowerCase().includes("instructor") ? "Alex Rivers" : "Muhammad Ahsan",
-          email,
-          role: email.toLowerCase().includes("instructor") ? "instructor" : "student",
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem("lms_mock_user", JSON.stringify(mockUser));
-        window.dispatchEvent(new Event("lms_mock_auth_changed"));
-        return { user: { uid: mockUser.uid, email }, userData: mockUser };
+        const savedUser = localStorage.getItem("lms_mock_user");
+        if (savedUser) {
+          const registeredUser = JSON.parse(savedUser);
+          if (registeredUser.email.toLowerCase() === email.toLowerCase()) {
+            setUser({ uid: registeredUser.uid, email: registeredUser.email, displayName: registeredUser.name });
+            setUserData(registeredUser);
+            window.dispatchEvent(new Event("lms_mock_auth_changed"));
+            return { user: { uid: registeredUser.uid, email: registeredUser.email, displayName: registeredUser.name }, userData: registeredUser };
+          } else {
+            const err = new Error("Account not found");
+            err.code = "auth/user-not-found";
+            throw err;
+          }
+        } else {
+          // If no user is registered, check against default preset seeds
+          const isInstructor = email.toLowerCase().includes("instructor");
+          const defaultEmail = isInstructor ? "alex.rivers@lms.studio" : "ahsanadeem840@gmail.com";
+          const defaultName = isInstructor ? "Alex Rivers" : "Muhammad Ahsan";
+          
+          if (email.toLowerCase() === defaultEmail.toLowerCase()) {
+            const mockUser = {
+              uid: isInstructor ? "mock_uid_instructor" : "mock_uid_student",
+              name: defaultName,
+              email: defaultEmail,
+              role: isInstructor ? "instructor" : "student",
+              createdAt: new Date().toISOString()
+            };
+            localStorage.setItem("lms_mock_user", JSON.stringify(mockUser));
+            setUser({ uid: mockUser.uid, email: mockUser.email, displayName: mockUser.name });
+            setUserData(mockUser);
+            window.dispatchEvent(new Event("lms_mock_auth_changed"));
+            return { user: { uid: mockUser.uid, email: mockUser.email, displayName: mockUser.name }, userData: mockUser };
+          } else {
+            const err = new Error("Account not found");
+            err.code = "auth/user-not-found";
+            throw err;
+          }
+        }
       }
 
       // Real Firebase login

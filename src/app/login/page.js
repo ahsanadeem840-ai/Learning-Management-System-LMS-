@@ -116,7 +116,9 @@ function LoginForm() {
     } catch (err) {
       console.error(err);
       let errMsg = "Failed to sign in. Please verify your credentials.";
-      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+      if (err.code === "auth/user-not-found" || err.message === "Account not found") {
+        errMsg = "Account not found. Please register first.";
+      } else if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
         errMsg = "Invalid email or password. Please try again.";
       } else if (err.code === "auth/invalid-email") {
         errMsg = "The email address is badly formatted.";
