@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function StudentLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, userData, logoutUser, loading } = useAuth();
   
   // Responsive sidebar toggles
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -15,6 +17,13 @@ export default function StudentLayout({ children }) {
   // Dynamic header dropdowns
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  // Guard the route: redirect to signin if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login?mode=signin");
+    }
+  }, [user, loading, router]);
 
   // Sidebar Menu Items
   const menuItems = [
@@ -83,9 +92,42 @@ export default function StudentLayout({ children }) {
     },
   ];
 
-  const handleLogout = () => {
-    router.push("/login?mode=signin");
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      router.push("/login?mode=signin");
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  const getInitials = (name) => {
+    if (!name) return "ST";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return name.substr(0, 2).toUpperCase();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0F172A] text-slate-300 flex items-center justify-center font-semibold">
+        <div className="flex items-center gap-3">
+          <svg className="animate-spin h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          Loading your learning portal...
+        </div>
+      </div>
+    );
+  }
+
+  // Guard safety fallback check
+  if (!user) return null;
+
+  const displayName = userData?.name || user?.displayName || "Student";
+  const displayEmail = userData?.email || user?.email || "";
+  const initials = getInitials(displayName);
 
   const navHeader = (
     <header className="h-16 border-b border-white/5 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-6">
@@ -174,10 +216,10 @@ export default function StudentLayout({ children }) {
             className="flex items-center gap-2.5 p-1 px-2 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all text-left"
           >
             <div className="w-7.5 h-7.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white uppercase shadow-md shadow-indigo-500/20">
-              MA
+              {initials}
             </div>
             <div className="hidden lg:block text-xs leading-none">
-              <div className="font-bold text-slate-200">Muhammad Ahsan</div>
+              <div className="font-bold text-slate-200">{displayName}</div>
               <div className="text-[10px] text-slate-500 mt-0.5">Student</div>
             </div>
             <svg className="w-4 h-4 text-slate-400 hidden lg:block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -189,8 +231,8 @@ export default function StudentLayout({ children }) {
           {showProfileMenu && (
             <div className="absolute right-0 mt-2.5 w-52 glass-panel rounded-2xl p-2.5 z-50 animate-fade-in">
               <div className="px-3.5 py-2 border-b border-white/5 text-xs lg:hidden">
-                <div className="font-bold text-slate-200">Muhammad Ahsan</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">ahsanadeem840@gmail.com</div>
+                <div className="font-bold text-slate-200">{displayName}</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">{displayEmail}</div>
               </div>
               <div className="space-y-1 py-1">
                 <Link href="/student/profile" className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
@@ -282,12 +324,12 @@ export default function StudentLayout({ children }) {
         <div className="p-4 border-t border-white/5 shrink-0">
           <div className={`flex items-center gap-3 ${isCollapsed ? "justify-center" : "bg-white/5 border border-white/5 rounded-2xl p-3"}`}>
             <div className="w-8.5 h-8.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white uppercase shrink-0">
-              MA
+              {initials}
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0 animate-fade-in">
-                <div className="text-xs font-bold text-white truncate">Muhammad Ahsan</div>
-                <div className="text-[9px] text-slate-500 truncate mt-0.5">ahsanadeem840@gmail.com</div>
+                <div className="text-xs font-bold text-white truncate">{displayName}</div>
+                <div className="text-[9px] text-slate-500 truncate mt-0.5">{displayEmail}</div>
               </div>
             )}
           </div>
@@ -346,11 +388,11 @@ export default function StudentLayout({ children }) {
             <div className="border-t border-white/5 pt-4 mt-auto">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white uppercase">
-                  MA
+                  {initials}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white">Muhammad Ahsan</div>
-                  <div className="text-[10px] text-slate-500">ahsanadeem840@gmail.com</div>
+                  <div className="text-xs font-bold text-white">{displayName}</div>
+                  <div className="text-[10px] text-slate-500">{displayEmail}</div>
                 </div>
               </div>
               <button

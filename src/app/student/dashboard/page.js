@@ -3,10 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { coursesData } from "@/data/courses";
+import { useAuth } from "@/context/AuthContext";
+import { getCourses, getUserStats, updateUserStats, getSubmissions, getUserCompletedLessons } from "@/lib/db";
 
 export default function StudentDashboard() {
   const router = useRouter();
+  const { user, userData } = useAuth();
 
   // Set page title
   useEffect(() => {
@@ -25,28 +27,49 @@ export default function StudentDashboard() {
   const [overallCompletedCount, setOverallCompletedCount] = useState(4);
   const [overallAvgGrade, setOverallAvgGrade] = useState(92);
 
-  const syncData = useCallback(() => {
-    // 1. Enrolled courses
-    const saved = localStorage.getItem("lms_enrolled_courses");
+  const syncData = useCallback(async () => {
     let enrolledIds = [];
-    if (saved) {
-      enrolledIds = JSON.parse(saved);
+    let minutes = 180;
+    let streak = 5;
+    let subs = [];
+
+    const listCourses = await getCourses();
+
+    if (user) {
+      const stats = await getUserStats(user.uid);
+      enrolledIds = stats?.enrolledCourses || [];
+      minutes = stats?.studyTime !== undefined ? stats.studyTime : 180;
+      streak = stats?.studyStreak !== undefined ? stats.studyStreak : 5;
+      subs = await getSubmissions(user.uid, "student");
     } else {
-      enrolledIds = ["nextjs15", "uiuxfigma"];
-      localStorage.setItem("lms_enrolled_courses", JSON.stringify(enrolledIds));
+      const saved = localStorage.getItem("lms_enrolled_courses");
+      enrolledIds = saved ? JSON.parse(saved) : ["nextjs15", "uiuxfigma"];
+      minutes = parseInt(localStorage.getItem("lms_study_time") || "180");
+      streak = parseInt(localStorage.getItem("lms_study_streak") || "5");
+      const savedSubs = localStorage.getItem("lms_submissions");
+      subs = savedSubs ? JSON.parse(savedSubs) : [];
     }
+
     setEnrolledCourseIds(enrolledIds);
+    setStudyMinutes(minutes);
+    setStudyStreak(streak);
 
     // 2. Completed lessons map
-    const savedLessons = localStorage.getItem("lms_completed_lessons");
     let completedLessonsMap = {};
-    if (savedLessons) {
-      completedLessonsMap = JSON.parse(savedLessons);
+    if (user) {
+      for (const courseId of enrolledIds) {
+        completedLessonsMap[courseId] = await getUserCompletedLessons(user.uid, courseId);
+      }
+    } else {
+      const savedLessons = localStorage.getItem("lms_completed_lessons");
+      if (savedLessons) {
+        completedLessonsMap = JSON.parse(savedLessons);
+      }
     }
 
     // Helpers to get course lesson counts and completed counts
     const getCourseLessonsCount = (courseId) => {
-      const course = coursesData.find(c => c.id === courseId);
+      const course = listCourses.find(c => c.id === courseId);
       if (!course) return 10;
       return course.syllabus ? course.syllabus.reduce((acc, mod) => acc + mod.lessons.length, 0) : 10;
     };
@@ -91,7 +114,7 @@ export default function StudentDashboard() {
     const list = [...computedInProgress];
     enrolledIds.forEach((id) => {
       if (!list.some((c) => c.id === id)) {
-        const fullCourse = coursesData.find((c) => c.id === id);
+        const fullCourse = listCourses.find((c) => c.id === id);
         if (fullCourse) {
           const total = getCourseLessonsCount(id);
           const completed = getCompletedLessonsCount(id);
@@ -113,7 +136,7 @@ export default function StudentDashboard() {
     setInProgressCourses(list);
 
     // 3. Recommended list
-    const recom = coursesData
+    const recom = listCourses
       .filter((c) => !enrolledIds.includes(c.id))
       .slice(0, 3)
       .map((c) => ({
@@ -132,31 +155,24 @@ export default function StudentDashboard() {
       }));
     setRecommendedCourses(recom);
 
-    // 4. Study minutes & streak
-    const savedMinutes = localStorage.getItem("lms_study_time");
-    if (savedMinutes) {
-      setStudyMinutes(parseInt(savedMinutes));
-    }
-    const savedStreak = localStorage.getItem("lms_study_streak");
-    if (savedStreak) {
-      setStudyStreak(parseInt(savedStreak));
-    }
-
-    // 5. Completed courses count (dynamically check enrolled courses at 100%, + 2 default completed ones)
+    // 4. Completed courses count (dynamically check enrolled courses at 100%, + 2 default completed ones)
     const completedEnrolledCount = list.filter(c => c.progress === 100).length;
     setOverallCompletedCount(completedEnrolledCount + 2);
 
-    // 6. Submissions average quiz score
-    const savedSubmissions = localStorage.getItem("lms_submissions");
-    if (savedSubmissions) {
-      const subs = JSON.parse(savedSubmissions);
-      const ahsanGrades = subs.filter(s => s.studentName === "Muhammad Ahsan" && s.status === "Graded" && s.grade !== null);
-      if (ahsanGrades.length > 0) {
-        const avg = Math.round(ahsanGrades.reduce((acc, curr) => acc + curr.grade, 0) / ahsanGrades.length);
+    // 5. Submissions average quiz score
+    if (subs.length > 0) {
+      const studentName = userData?.name || "Muhammad Ahsan";
+      const studentGrades = subs.filter(s => 
+        (s.studentId === user?.uid || s.studentName === studentName) && 
+        s.status === "Graded" && 
+        s.grade !== null
+      );
+      if (studentGrades.length > 0) {
+        const avg = Math.round(studentGrades.reduce((acc, curr) => acc + curr.grade, 0) / studentGrades.length);
         setOverallAvgGrade(avg);
       }
     }
-  }, []);
+  }, [user, userData]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -179,12 +195,22 @@ export default function StudentDashboard() {
     router.push(`/student/explore/${courseId}`);
   };
 
-  const handleEnrollCourse = (courseId, courseTitle) => {
-    const saved = localStorage.getItem("lms_enrolled_courses");
-    let list = saved ? JSON.parse(saved) : [];
-    if (!list.includes(courseId)) {
-      list.push(courseId);
-      localStorage.setItem("lms_enrolled_courses", JSON.stringify(list));
+  const handleEnrollCourse = async (courseId, courseTitle) => {
+    let updatedList = [];
+    if (user) {
+      const stats = await getUserStats(user.uid);
+      updatedList = [...(stats?.enrolledCourses || [])];
+      if (!updatedList.includes(courseId)) {
+        updatedList.push(courseId);
+        await updateUserStats(user.uid, { enrolledCourses: updatedList });
+      }
+    } else {
+      const saved = localStorage.getItem("lms_enrolled_courses");
+      updatedList = saved ? JSON.parse(saved) : [];
+      if (!updatedList.includes(courseId)) {
+        updatedList.push(courseId);
+        localStorage.setItem("lms_enrolled_courses", JSON.stringify(updatedList));
+      }
     }
 
     setEnrollSuccessMessage(`Successfully enrolled in "${courseTitle}"!`);
@@ -197,6 +223,7 @@ export default function StudentDashboard() {
       setEnrollSuccessMessage("");
     }, 4000);
   };
+
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -225,20 +252,19 @@ export default function StudentDashboard() {
           {/* Decorative glowing gradient orb inside banner */}
           <div className="absolute top-[-30px] right-[-30px] w-48 h-48 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
           <div className="absolute bottom-[-30px] left-[20%] w-48 h-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
-          
+
           <div className="space-y-2 relative z-10">
             <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-[10px] font-bold text-indigo-300 uppercase tracking-wider">
-              ✨ Module 2 Day 3
+              ✨ LMS Studio Portal
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-              Welcome Back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">Muhammad Ahsan</span>!
+              Welcome Back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">{displayName}</span>!
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm max-w-lg leading-relaxed mt-1">
               &quot;Education is the passport to the future, for tomorrow belongs to those who prepare for it today.&quot; Keep expanding your boundaries!
             </p>
           </div>
 
-          {/* Banner bottom indicators */}
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6 relative z-10 pt-4 border-t border-white/5">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center border border-orange-500/15">

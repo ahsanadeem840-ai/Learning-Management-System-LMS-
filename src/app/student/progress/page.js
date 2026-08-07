@@ -2,15 +2,22 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { coursesData } from "@/data/courses";
+import { useAuth } from "@/context/AuthContext";
+import { 
+  getCourses, 
+  getUserStats, 
+  updateUserStats, 
+  getSubmissions, 
+  getUserCompletedLessons, 
+  updateUserCompletedLessons 
+} from "@/lib/db";
 
 // Helper to seed initial completed lessons if not present
-const getInitialCompletedLessons = () => {
+const getInitialCompletedLessons = (listCourses) => {
   const nextjsLessons = [];
   const uiuxLessons = [];
 
-  // Seed nextjs15 (first 12 lessons out of 16 in syllabus)
-  const nextjsCourse = coursesData.find(c => c.id === "nextjs15");
+  const nextjsCourse = listCourses.find(c => c.id === "nextjs15");
   if (nextjsCourse && nextjsCourse.syllabus) {
     let count = 0;
     nextjsCourse.syllabus.forEach(mod => {
@@ -23,8 +30,7 @@ const getInitialCompletedLessons = () => {
     });
   }
 
-  // Seed uiuxfigma (first 4 lessons out of 9 in syllabus)
-  const uiuxCourse = coursesData.find(c => c.id === "uiuxfigma");
+  const uiuxCourse = listCourses.find(c => c.id === "uiuxfigma");
   if (uiuxCourse && uiuxCourse.syllabus) {
     let count = 0;
     uiuxCourse.syllabus.forEach(mod => {
@@ -44,12 +50,15 @@ const getInitialCompletedLessons = () => {
 };
 
 export default function ProgressDashboard() {
+  const { user, userData } = useAuth();
+
   // Sync States
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
   const [completedLessons, setCompletedLessons] = useState({});
   const [studyMinutes, setStudyMinutes] = useState(180);
   const [studyStreak, setStudyStreak] = useState(5);
   const [submissions, setSubmissions] = useState([]);
+  const [coursesList, setCoursesList] = useState([]);
   
   // Interactive UI States
   const [selectedCourseId, setSelectedCourseId] = useState("");
@@ -61,61 +70,60 @@ export default function ProgressDashboard() {
   const [timerSeconds, setTimerSeconds] = useState(0);
 
   // Initial Seed & Sync
-  const syncData = useCallback(() => {
-    // 1. Enrolled courses
-    const savedCourses = localStorage.getItem("lms_enrolled_courses");
+  const syncData = useCallback(async () => {
     let enrolledIds = ["nextjs15", "uiuxfigma"];
-    if (savedCourses) {
-      enrolledIds = JSON.parse(savedCourses);
+    let compLessons = {};
+    let minutes = 180;
+    let streak = 5;
+    let subs = [];
+
+    const listCourses = await getCourses();
+    setCoursesList(listCourses);
+
+    if (user) {
+      const stats = await getUserStats(user.uid);
+      enrolledIds = stats?.enrolledCourses || [];
+      minutes = stats?.studyTime !== undefined ? stats.studyTime : 180;
+      streak = stats?.studyStreak !== undefined ? stats.studyStreak : 5;
+      subs = await getSubmissions(user.uid, "student");
+
+      for (const courseId of enrolledIds) {
+        const lessons = await getUserCompletedLessons(user.uid, courseId);
+        compLessons[courseId] = lessons || [];
+      }
     } else {
-      localStorage.setItem("lms_enrolled_courses", JSON.stringify(enrolledIds));
+      const savedCourses = localStorage.getItem("lms_enrolled_courses");
+      if (savedCourses) {
+        enrolledIds = JSON.parse(savedCourses);
+      }
+      const savedLessons = localStorage.getItem("lms_completed_lessons");
+      if (savedLessons) {
+        compLessons = JSON.parse(savedLessons);
+      } else {
+        compLessons = getInitialCompletedLessons(listCourses);
+      }
+      const savedMinutes = localStorage.getItem("lms_study_time");
+      minutes = savedMinutes ? parseInt(savedMinutes) : 180;
+      const savedStreak = localStorage.getItem("lms_study_streak");
+      streak = savedStreak ? parseInt(savedStreak) : 5;
+      const savedSubmissions = localStorage.getItem("lms_submissions");
+      subs = savedSubmissions ? JSON.parse(savedSubmissions) : [];
     }
+
     setEnrolledCourseIds(enrolledIds);
+    setCompletedLessons(compLessons);
+    setStudyMinutes(minutes);
+    setStudyStreak(streak);
+    setSubmissions(subs);
+
     if (enrolledIds.length > 0 && !selectedCourseId) {
       setSelectedCourseId(enrolledIds[0]);
     }
-
-    // 2. Completed lessons
-    const savedLessons = localStorage.getItem("lms_completed_lessons");
-    let compLessons = {};
-    if (savedLessons) {
-      compLessons = JSON.parse(savedLessons);
-    } else {
-      compLessons = getInitialCompletedLessons();
-      localStorage.setItem("lms_completed_lessons", JSON.stringify(compLessons));
-    }
-    setCompletedLessons(compLessons);
-
-    // 3. Study Time
-    const savedMinutes = localStorage.getItem("lms_study_time");
-    if (savedMinutes) {
-      setStudyMinutes(parseInt(savedMinutes));
-    } else {
-      localStorage.setItem("lms_study_time", "180");
-      setStudyMinutes(180);
-    }
-
-    // 4. Streak
-    const savedStreak = localStorage.getItem("lms_study_streak");
-    if (savedStreak) {
-      setStudyStreak(parseInt(savedStreak));
-    } else {
-      localStorage.setItem("lms_study_streak", "5");
-      setStudyStreak(5);
-    }
-
-    // 5. Submissions
-    const savedSubmissions = localStorage.getItem("lms_submissions");
-    if (savedSubmissions) {
-      setSubmissions(JSON.parse(savedSubmissions));
-    }
-  }, [selectedCourseId]);
+  }, [selectedCourseId, user]);
 
   useEffect(() => {
     document.title = "Study Progress Console | LMS Studio";
-    const timer = setTimeout(() => {
-      syncData();
-    }, 0);
+    syncData();
 
     // Listen to custom updates
     window.addEventListener("lms_enrollment_updated", syncData);
@@ -123,7 +131,6 @@ export default function ProgressDashboard() {
     window.addEventListener("lms_progress_updated", syncData);
     
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("lms_enrollment_updated", syncData);
       window.removeEventListener("lms_submissions_updated", syncData);
       window.removeEventListener("lms_progress_updated", syncData);
@@ -143,12 +150,18 @@ export default function ProgressDashboard() {
     return () => clearInterval(interval);
   }, [isTimerActive]);
 
-  const handleToggleTimer = () => {
+  const handleToggleTimer = async () => {
     if (isTimerActive) {
       // Stopping the timer
       const elapsedMins = Math.max(1, Math.round(timerSeconds / 60));
       const newMinutes = studyMinutes + elapsedMins;
-      localStorage.setItem("lms_study_time", newMinutes.toString());
+      
+      if (user) {
+        await updateUserStats(user.uid, { studyTime: newMinutes });
+      } else {
+        localStorage.setItem("lms_study_time", newMinutes.toString());
+      }
+      
       setStudyMinutes(newMinutes);
       setIsTimerActive(false);
       setTimerSeconds(0);
@@ -179,7 +192,7 @@ export default function ProgressDashboard() {
   };
 
   // Checkbox handlers
-  const handleToggleLesson = (courseId, lessonTitle) => {
+  const handleToggleLesson = async (courseId, lessonTitle) => {
     const currentCompleted = completedLessons[courseId] ? [...completedLessons[courseId]] : [];
     let updated = [];
     
@@ -189,26 +202,45 @@ export default function ProgressDashboard() {
       updated = [...currentCompleted, lessonTitle];
     }
 
+    if (user) {
+      await updateUserCompletedLessons(user.uid, courseId, updated);
+    } else {
+      const newCompletedLessons = {
+        ...completedLessons,
+        [courseId]: updated
+      };
+      localStorage.setItem("lms_completed_lessons", JSON.stringify(newCompletedLessons));
+    }
+
     const newCompletedLessons = {
       ...completedLessons,
       [courseId]: updated
     };
 
     setCompletedLessons(newCompletedLessons);
-    localStorage.setItem("lms_completed_lessons", JSON.stringify(newCompletedLessons));
     
     // Dispatch custom event to notify other routes
     window.dispatchEvent(new Event("lms_progress_updated"));
   };
 
-  const handleMarkAllLessons = (courseId, lessonsList, markAll) => {
+  const handleMarkAllLessons = async (courseId, lessonsList, markAll) => {
+    const updated = markAll ? lessonsList : [];
+    if (user) {
+      await updateUserCompletedLessons(user.uid, courseId, updated);
+    } else {
+      const newCompletedLessons = {
+        ...completedLessons,
+        [courseId]: updated
+      };
+      localStorage.setItem("lms_completed_lessons", JSON.stringify(newCompletedLessons));
+    }
+
     const newCompletedLessons = {
       ...completedLessons,
-      [courseId]: markAll ? lessonsList : []
+      [courseId]: updated
     };
     
     setCompletedLessons(newCompletedLessons);
-    localStorage.setItem("lms_completed_lessons", JSON.stringify(newCompletedLessons));
     
     // Dispatch custom event to notify other routes
     window.dispatchEvent(new Event("lms_progress_updated"));
@@ -218,7 +250,7 @@ export default function ProgressDashboard() {
   // Calculations for metrics
   const getCourseDetailsList = () => {
     return enrolledCourseIds.map(id => {
-      const course = coursesData.find(c => c.id === id);
+      const course = coursesList.find(c => c.id === id);
       if (!course) return null;
 
       const allCourseLessons = [];
@@ -256,7 +288,8 @@ export default function ProgressDashboard() {
   const courseCompletionRate = totalEnrolled > 0 ? Math.round((completedCoursesCount / totalEnrolled) * 100) : 0;
   
   // Submissions stats
-  const ahsanSubs = submissions.filter(s => s.studentName === "Muhammad Ahsan");
+  const studentName = userData?.name || "Muhammad Ahsan";
+  const ahsanSubs = submissions.filter(s => s.studentId === user?.uid || s.studentName === studentName);
   const gradedSubs = ahsanSubs.filter(s => s.status === "Graded" && s.grade !== null);
   const averageGrade = gradedSubs.length > 0
     ? Math.round(gradedSubs.reduce((acc, curr) => acc + curr.grade, 0) / gradedSubs.length)
@@ -265,7 +298,7 @@ export default function ProgressDashboard() {
 
   // Active course calculations
   const activeCourse = courseDetailsList.find(c => c.id === selectedCourseId) || courseDetailsList[0];
-  const activeFullCourse = coursesData.find(c => c.id === selectedCourseId) || coursesData.find(c => c.id === enrolledCourseIds[0]);
+  const activeFullCourse = coursesList.find(c => c.id === selectedCourseId) || coursesList.find(c => c.id === enrolledCourseIds[0]);
 
   // Achievements/Badges
   const badgesList = [

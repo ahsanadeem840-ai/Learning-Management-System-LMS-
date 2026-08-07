@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function InstructorDashboard() {
+  const { user, userData } = useAuth();
   useEffect(() => {
     document.title = "Instructor Dashboard | LMS Studio";
   }, []);
@@ -55,7 +57,7 @@ export default function InstructorDashboard() {
           Instructor Center
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-          Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">Alex Rivers</span>!
+          Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">{userData?.name || user?.displayName || "Alex Rivers"}</span>!
         </h1>
         <p className="text-slate-400 text-xs sm:text-sm max-w-xl">
           Track enrollments, manage student feedback, and check sales analytics on your premium course workspace.

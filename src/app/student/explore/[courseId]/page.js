@@ -6,12 +6,20 @@ import { useRouter } from "next/navigation";
 import { coursesData } from "@/data/courses";
 import { quizzesData } from "@/data/quizzes";
 import QuizPlayer from "@/components/QuizPlayer";
-
+import { useAuth } from "@/context/AuthContext";
+import { 
+  getUserStats, 
+  updateUserStats, 
+  getUserCompletedLessons, 
+  updateUserCompletedLessons, 
+  saveSubmission 
+} from "@/lib/db";
 
 export default function StudentCourseDetails({ params }) {
   const resolvedParams = use(params);
   const courseId = resolvedParams.courseId;
   const router = useRouter();
+  const { user, userData } = useAuth();
 
   const course = coursesData.find((c) => c.id === courseId);
 
@@ -22,57 +30,78 @@ export default function StudentCourseDetails({ params }) {
   const [expandedModules, setExpandedModules] = useState({ 0: true });
   const [completedLessons, setCompletedLessons] = useState([]);
 
-  // Fetch enrollment state & completed lessons from localStorage
-  const syncCompleted = useCallback(() => {
-    const saved = localStorage.getItem("lms_completed_lessons");
-    if (saved) {
-      const map = JSON.parse(saved);
-      setCompletedLessons(map[courseId] || []);
+  // Fetch enrollment state & completed lessons from Firestore
+  const syncCompleted = useCallback(async () => {
+    if (user) {
+      const lessons = await getUserCompletedLessons(user.uid, courseId);
+      setCompletedLessons(lessons || []);
+    } else {
+      const saved = localStorage.getItem("lms_completed_lessons");
+      if (saved) {
+        const map = JSON.parse(saved);
+        setCompletedLessons(map[courseId] || []);
+      }
     }
-  }, [courseId]);
+  }, [courseId, user]);
 
   useEffect(() => {
     if (!course) return;
     document.title = `${course.title} | LMS Studio`;
 
-    const timer = setTimeout(() => {
-      const saved = localStorage.getItem("lms_enrolled_courses");
-      if (saved) {
-        const list = JSON.parse(saved);
-        if (list.includes(courseId)) {
+    const checkEnrollment = async () => {
+      if (user) {
+        const stats = await getUserStats(user.uid);
+        if (stats?.enrolledCourses?.includes(courseId)) {
           setEnrolled(true);
         }
+      } else {
+        const saved = localStorage.getItem("lms_enrolled_courses");
+        if (saved) {
+          const list = JSON.parse(saved);
+          if (list.includes(courseId)) {
+            setEnrolled(true);
+          }
+        }
       }
-      syncCompleted();
-    }, 0);
+      await syncCompleted();
+    };
 
-
+    checkEnrollment();
 
     window.addEventListener("lms_progress_updated", syncCompleted);
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("lms_progress_updated", syncCompleted);
     };
-  }, [courseId, course, syncCompleted]);
+  }, [courseId, course, syncCompleted, user]);
 
   const [activeQuiz, setActiveQuiz] = useState(null);
 
-  const handleToggleLesson = (lessonTitle) => {
+  const handleToggleLesson = async (lessonTitle) => {
     if (!enrolled) return;
-    const saved = localStorage.getItem("lms_completed_lessons");
-    const map = saved ? JSON.parse(saved) : {};
-    const current = map[courseId] || [];
+    
     let updated = [];
-    if (current.includes(lessonTitle)) {
-      updated = current.filter(t => t !== lessonTitle);
+    if (user) {
+      const current = await getUserCompletedLessons(user.uid, courseId);
+      if (current.includes(lessonTitle)) {
+        updated = current.filter(t => t !== lessonTitle);
+      } else {
+        updated = [...current, lessonTitle];
+      }
+      await updateUserCompletedLessons(user.uid, courseId, updated);
     } else {
-      updated = [...current, lessonTitle];
+      const saved = localStorage.getItem("lms_completed_lessons");
+      const map = saved ? JSON.parse(saved) : {};
+      const current = map[courseId] || [];
+      if (current.includes(lessonTitle)) {
+        updated = current.filter(t => t !== lessonTitle);
+      } else {
+        updated = [...current, lessonTitle];
+      }
+      map[courseId] = updated;
+      localStorage.setItem("lms_completed_lessons", JSON.stringify(map));
     }
-    map[courseId] = updated;
-    localStorage.setItem("lms_completed_lessons", JSON.stringify(map));
+    
     setCompletedLessons(updated);
-
-    // Dispatch progress updated event
     window.dispatchEvent(new Event("lms_progress_updated"));
   };
 
@@ -89,33 +118,41 @@ export default function StudentCourseDetails({ params }) {
     }
   };
 
-  const handleQuizComplete = (scorePercent, isPassed) => {
+  const handleQuizComplete = async (scorePercent, isPassed) => {
     if (isPassed) {
-      const saved = localStorage.getItem("lms_completed_lessons");
-      const map = saved ? JSON.parse(saved) : {};
-      const current = map[courseId] || [];
-      if (!current.includes(activeQuiz.lessonTitle)) {
-        const updated = [...current, activeQuiz.lessonTitle];
-        map[courseId] = updated;
-        localStorage.setItem("lms_completed_lessons", JSON.stringify(map));
-        setCompletedLessons(updated);
+      let updated = [];
+      if (user) {
+        const current = await getUserCompletedLessons(user.uid, courseId);
+        if (!current.includes(activeQuiz.lessonTitle)) {
+          updated = [...current, activeQuiz.lessonTitle];
+          await updateUserCompletedLessons(user.uid, courseId, updated);
+        } else {
+          updated = current;
+        }
+      } else {
+        const saved = localStorage.getItem("lms_completed_lessons");
+        const map = saved ? JSON.parse(saved) : {};
+        const current = map[courseId] || [];
+        if (!current.includes(activeQuiz.lessonTitle)) {
+          updated = [...current, activeQuiz.lessonTitle];
+          map[courseId] = updated;
+          localStorage.setItem("lms_completed_lessons", JSON.stringify(map));
+        } else {
+          updated = current;
+        }
       }
-      
-      // Dispatch progress updated event
+      setCompletedLessons(updated);
       window.dispatchEvent(new Event("lms_progress_updated"));
     }
 
-    // Save quiz grade results to localStorage for dashboard metrics & AssignmentsConsole
-    const savedSubs = localStorage.getItem("lms_submissions");
-    let submissions = savedSubs ? JSON.parse(savedSubs) : [];
+    const studentName = userData?.name || "Muhammad Ahsan";
     const newSubmission = {
-      id: Date.now(),
-      studentName: "Muhammad Ahsan",
+      studentName,
+      studentId: user?.uid || "mock_uid_12345",
       courseId: courseId,
       course: course.title,
       assignmentId: activeQuiz.title.replace(/\s+/g, "_").toLowerCase(),
       assignment: activeQuiz.lessonTitle,
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       fileName: "online-quiz-assessment",
       status: "Graded",
       grade: scorePercent,
@@ -123,15 +160,17 @@ export default function StudentCourseDetails({ params }) {
       comments: `Scored ${scorePercent}% on the online assessment.`
     };
 
-    // Filter out previous attempts for the same quiz
-    submissions = submissions.filter(s => s.studentName !== "Muhammad Ahsan" || s.assignment !== activeQuiz.lessonTitle);
-    submissions.push(newSubmission);
-    localStorage.setItem("lms_submissions", JSON.stringify(submissions));
-    window.dispatchEvent(new Event("lms_submissions_updated"));
+    // Save submission to Firestore
+    try {
+      await saveSubmission(newSubmission);
+    } catch (err) {
+      console.error("Error saving quiz submission:", err);
+    }
 
     // Close the quiz player
     setActiveQuiz(null);
   };
+
 
   if (!course) {
     return (
@@ -164,7 +203,7 @@ export default function StudentCourseDetails({ params }) {
   };
 
   // Enroll handler
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     if (enrolled) {
       // Direct navigate if already enrolled
       router.push("/student/my-learning");
@@ -174,16 +213,26 @@ export default function StudentCourseDetails({ params }) {
     setLoading(true);
 
     // Simulate validator latency (1.5s)
-    setTimeout(() => {
+    setTimeout(async () => {
       setLoading(false);
       setEnrolled(true);
 
-      // Save to local storage
-      const saved = localStorage.getItem("lms_enrolled_courses");
-      let list = saved ? JSON.parse(saved) : [];
-      if (!list.includes(courseId)) {
-        list.push(courseId);
-        localStorage.setItem("lms_enrolled_courses", JSON.stringify(list));
+      // Save to Firestore/local storage
+      let updatedList = [];
+      if (user) {
+        const stats = await getUserStats(user.uid);
+        updatedList = [...(stats?.enrolledCourses || [])];
+        if (!updatedList.includes(courseId)) {
+          updatedList.push(courseId);
+          await updateUserStats(user.uid, { enrolledCourses: updatedList });
+        }
+      } else {
+        const saved = localStorage.getItem("lms_enrolled_courses");
+        updatedList = saved ? JSON.parse(saved) : [];
+        if (!updatedList.includes(courseId)) {
+          updatedList.push(courseId);
+          localStorage.setItem("lms_enrolled_courses", JSON.stringify(updatedList));
+        }
       }
 
       // Trigger standard CustomEvent to sync explore tab/dashboard if needed

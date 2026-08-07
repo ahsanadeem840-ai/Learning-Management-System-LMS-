@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { getUserStats, getCourses, getUserCompletedLessons, updateUserProfile } from "@/lib/db";
 
 export default function StudentProfile() {
+  const { user, userData } = useAuth();
+
   useEffect(() => {
     document.title = "Student Profile | LMS Studio";
   }, []);
@@ -14,25 +18,118 @@ export default function StudentProfile() {
     skills: "React, Next.js, Tailwind CSS, JavaScript",
   });
 
+  const [stats, setStats] = useState({
+    enrolledCount: 4,
+    studyStreak: 5,
+    completedCount: 4,
+  });
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Sync profile data and stats
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        name: userData.name || user?.displayName || "Muhammad Ahsan",
+        email: userData.email || user?.email || "ahsanadeem840@gmail.com",
+        bio: userData.bio || "Passionate web developer specializing in Next.js, React, and modern UI design frameworks.",
+        skills: userData.skills || "React, Next.js, Tailwind CSS, JavaScript",
+      });
+    }
+
+    const loadStats = async () => {
+      let enrolled = 4;
+      let streak = 5;
+      let completedCount = 4;
+
+      const listCourses = await getCourses();
+
+      if (user) {
+        const userStats = await getUserStats(user.uid);
+        const enrolledCourses = userStats?.enrolledCourses || [];
+        enrolled = enrolledCourses.length;
+        streak = userStats?.studyStreak || 0;
+
+        // Count completed courses
+        let compCount = 0;
+        for (const courseId of enrolledCourses) {
+          const lessons = await getUserCompletedLessons(user.uid, courseId);
+          const course = listCourses.find(c => c.id === courseId);
+          const totalLessons = course?.syllabus ? course.syllabus.reduce((acc, mod) => acc + mod.lessons.length, 0) : 10;
+          if (lessons.length >= totalLessons) {
+            compCount++;
+          }
+        }
+        completedCount = compCount + 2; // Adding 2 defaults as initialized in design
+      } else {
+        const savedCourses = localStorage.getItem("lms_enrolled_courses");
+        if (savedCourses) enrolled = JSON.parse(savedCourses).length;
+        const savedStreak = localStorage.getItem("lms_study_streak");
+        if (savedStreak) streak = parseInt(savedStreak);
+        const savedLessons = localStorage.getItem("lms_completed_lessons");
+        if (savedLessons) {
+          const map = JSON.parse(savedLessons);
+          let compCount = 0;
+          Object.keys(map).forEach(courseId => {
+            const course = listCourses.find(c => c.id === courseId);
+            const totalLessons = course?.syllabus ? course.syllabus.reduce((acc, mod) => acc + mod.lessons.length, 0) : 10;
+            if (map[courseId].length >= totalLessons) {
+              compCount++;
+            }
+          });
+          completedCount = compCount + 2;
+        }
+      }
+
+      setStats({
+        enrolledCount: enrolled,
+        studyStreak: streak,
+        completedCount,
+      });
+    };
+
+    loadStats();
+  }, [user, userData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUpdating(true);
 
-    setTimeout(() => {
-      setIsUpdating(false);
+    try {
+      if (user) {
+        await updateUserProfile(user.uid, {
+          name: formData.name,
+          bio: formData.bio,
+          skills: formData.skills,
+        });
+      } else {
+        const saved = localStorage.getItem("lms_mock_user");
+        const mockUser = saved ? JSON.parse(saved) : {};
+        const updated = {
+          ...mockUser,
+          name: formData.name,
+          bio: formData.bio,
+          skills: formData.skills,
+        };
+        localStorage.setItem("lms_mock_user", JSON.stringify(updated));
+        window.dispatchEvent(new Event("lms_mock_auth_changed"));
+      }
+
       setSuccessMessage("Profile settings updated successfully!");
       setTimeout(() => {
         setSuccessMessage("");
       }, 4000);
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -65,7 +162,11 @@ export default function StudentProfile() {
 
           <div className="space-y-4">
             <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-2xl text-white uppercase shadow-lg shadow-indigo-500/25 mx-auto">
-              AA
+              {(() => {
+                const parts = (formData.name || "").trim().split(" ");
+                if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                return (formData.name || "AA").substr(0, 2).toUpperCase();
+              })()}
             </div>
 
             <div>
@@ -78,15 +179,15 @@ export default function StudentProfile() {
           <div className="border-t border-white/5 pt-6 grid grid-cols-3 gap-2">
             <div>
               <div className="text-[10px] text-slate-500 font-bold uppercase">Enrolled</div>
-              <div className="text-base font-black text-slate-200 mt-0.5">4</div>
+              <div className="text-base font-black text-slate-200 mt-0.5">{stats.enrolledCount}</div>
             </div>
             <div>
               <div className="text-[10px] text-slate-500 font-bold uppercase">Streak</div>
-              <div className="text-base font-black text-slate-200 mt-0.5">5d</div>
+              <div className="text-base font-black text-slate-200 mt-0.5">{stats.studyStreak}d</div>
             </div>
             <div>
               <div className="text-[10px] text-slate-500 font-bold uppercase">Completed</div>
-              <div className="text-base font-black text-slate-200 mt-0.5">4</div>
+              <div className="text-base font-black text-slate-200 mt-0.5">{stats.completedCount}</div>
             </div>
           </div>
         </div>

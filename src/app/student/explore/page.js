@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { coursesData } from "@/data/courses";
+import { useAuth } from "@/context/AuthContext";
+import { getCourses, getUserStats, updateUserStats } from "@/lib/db";
 
 export default function ExploreCourses() {
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     document.title = "Explore Courses | LMS Studio";
@@ -15,55 +17,73 @@ export default function ExploreCourses() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [enrollSuccessMessage, setEnrollSuccessMessage] = useState("");
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+  const [coursesList, setCoursesList] = useState([]);
 
-  // Sync enrolled courses from localStorage
-  const syncEnrollments = useCallback(() => {
-    const saved = localStorage.getItem("lms_enrolled_courses");
-    if (saved) {
-      setEnrolledCourseIds(JSON.parse(saved));
+  // Sync enrolled courses & courses list from Firestore
+  const syncEnrollments = useCallback(async () => {
+    const list = await getCourses();
+    setCoursesList(list);
+
+    if (user) {
+      const stats = await getUserStats(user.uid);
+      setEnrolledCourseIds(stats?.enrolledCourses || []);
     } else {
-      // Default initial enrollments from page setup
-      const initial = ["nextjs15", "uiuxfigma"];
-      localStorage.setItem("lms_enrolled_courses", JSON.stringify(initial));
-      setEnrolledCourseIds(initial);
+      const saved = localStorage.getItem("lms_enrolled_courses");
+      if (saved) {
+        setEnrolledCourseIds(JSON.parse(saved));
+      } else {
+        const initial = ["nextjs15", "uiuxfigma"];
+        localStorage.setItem("lms_enrolled_courses", JSON.stringify(initial));
+        setEnrolledCourseIds(initial);
+      }
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      syncEnrollments();
-    }, 0);
+    syncEnrollments();
 
     // Listen to custom updates (from details page)
     window.addEventListener("lms_enrollment_updated", syncEnrollments);
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("lms_enrollment_updated", syncEnrollments);
     };
   }, [syncEnrollments]);
 
   const categories = ["All", "Development", "Design", "Data Science & AI", "Marketing"];
 
-  const handleEnroll = (courseId, courseTitle) => {
-    const saved = localStorage.getItem("lms_enrolled_courses");
-    let list = saved ? JSON.parse(saved) : [];
-    if (!list.includes(courseId)) {
-      list.push(courseId);
-      localStorage.setItem("lms_enrolled_courses", JSON.stringify(list));
-      setEnrolledCourseIds(list);
+  const handleEnroll = async (courseId, courseTitle) => {
+    let updatedList = [];
+    if (user) {
+      const stats = await getUserStats(user.uid);
+      updatedList = [...(stats?.enrolledCourses || [])];
+      if (!updatedList.includes(courseId)) {
+        updatedList.push(courseId);
+        await updateUserStats(user.uid, { enrolledCourses: updatedList });
+      }
+    } else {
+      const saved = localStorage.getItem("lms_enrolled_courses");
+      updatedList = saved ? JSON.parse(saved) : [];
+      if (!updatedList.includes(courseId)) {
+        updatedList.push(courseId);
+        localStorage.setItem("lms_enrolled_courses", JSON.stringify(updatedList));
+      }
     }
-
+    
+    setEnrolledCourseIds(updatedList);
     setEnrollSuccessMessage(`Successfully enrolled in "${courseTitle}"!`);
+    window.dispatchEvent(new Event("lms_enrollment_updated"));
+
     setTimeout(() => {
       setEnrollSuccessMessage("");
     }, 4000);
   };
 
-  // Map coursesData to local state with correct enrolled property
-  const courses = coursesData.map((course) => ({
+  // Map courses list to local state with correct enrolled property
+  const courses = coursesList.map((course) => ({
     ...course,
     enrolled: enrolledCourseIds.includes(course.id),
   }));
+
 
   // Filter courses based on search & category
   const filteredCourses = courses.filter((course) => {

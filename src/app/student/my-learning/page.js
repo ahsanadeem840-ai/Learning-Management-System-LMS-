@@ -3,26 +3,43 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { coursesData } from "@/data/courses";
+import { useAuth } from "@/context/AuthContext";
+import { getCourses, getUserStats, getUserCompletedLessons } from "@/lib/db";
 
 export default function MyLearning() {
   const router = useRouter();
+  const { user } = useAuth();
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
   const [inProgressCourses, setInProgressCourses] = useState([]);
   const [completedCourses, setCompletedCourses] = useState([]);
   const [activeResume, setActiveResume] = useState(null);
   const [activeTab, setActiveTab] = useState("in-progress");
+  const [coursesList, setCoursesList] = useState([]);
 
-  const syncData = useCallback(() => {
-    const saved = localStorage.getItem("lms_enrolled_courses");
-    let enrolledIds = saved ? JSON.parse(saved) : ["nextjs15", "uiuxfigma"];
+  const syncData = useCallback(async () => {
+    let enrolledIds = [];
+    let completedLessonsMap = {};
+
+    const listCourses = await getCourses();
+    setCoursesList(listCourses);
+
+    if (user) {
+      const stats = await getUserStats(user.uid);
+      enrolledIds = stats?.enrolledCourses || [];
+      for (const courseId of enrolledIds) {
+        const lessons = await getUserCompletedLessons(user.uid, courseId);
+        completedLessonsMap[courseId] = lessons || [];
+      }
+    } else {
+      const saved = localStorage.getItem("lms_enrolled_courses");
+      enrolledIds = saved ? JSON.parse(saved) : ["nextjs15", "uiuxfigma"];
+      const savedCompleted = localStorage.getItem("lms_completed_lessons");
+      completedLessonsMap = savedCompleted ? JSON.parse(savedCompleted) : {};
+    }
     setEnrolledCourseIds(enrolledIds);
 
-    const savedCompleted = localStorage.getItem("lms_completed_lessons");
-    let completedLessonsMap = savedCompleted ? JSON.parse(savedCompleted) : {};
-
     const getCourseLessonsCount = (courseId) => {
-      const course = coursesData.find(c => c.id === courseId);
+      const course = listCourses.find(c => c.id === courseId);
       if (!course) return 10;
       return course.syllabus ? course.syllabus.reduce((acc, mod) => acc + mod.lessons.length, 0) : 10;
     };
@@ -82,7 +99,7 @@ export default function MyLearning() {
     ];
 
     enrolledIds.forEach(id => {
-      const course = coursesData.find(c => c.id === id);
+      const course = listCourses.find(c => c.id === id);
       if (course) {
         const total = getCourseLessonsCount(id);
         const completed = getCompletedLessonsCount(id);
@@ -114,18 +131,15 @@ export default function MyLearning() {
 
     setInProgressCourses(inProg);
     setCompletedCourses(comp);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     document.title = "My Learning | LMS Studio";
-    const timer = setTimeout(() => {
-      syncData();
-    }, 0);
+    syncData();
 
     window.addEventListener("lms_progress_updated", syncData);
     window.addEventListener("lms_enrollment_updated", syncData);
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("lms_progress_updated", syncData);
       window.removeEventListener("lms_enrollment_updated", syncData);
     };

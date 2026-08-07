@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CertificatesBoard() {
+  const { user, userData } = useAuth();
   useEffect(() => {
     document.title = "My Certificates | LMS Studio";
   }, []);
@@ -117,7 +119,7 @@ export default function CertificatesBoard() {
 
               <div className="space-y-2">
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
-                  Muhammad Ahsan
+                  {userData?.name || user?.displayName || "Muhammad Ahsan"}
                 </h2>
                 <div className="w-16 h-0.5 bg-indigo-500 mx-auto rounded-full" />
               </div>

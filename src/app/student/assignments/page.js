@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { coursesData } from "@/data/courses";
+import { useAuth } from "@/context/AuthContext";
+import { getUserStats, getSubmissions, saveSubmission } from "@/lib/db";
 
 // Global database of assignments mapped to course IDs
 const ASSIGNMENTS_DB = [
@@ -111,6 +112,7 @@ const DEFAULT_SUBMISSIONS = [
 ];
 
 export default function StudentAssignments() {
+  const { user, userData } = useAuth();
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -128,26 +130,30 @@ export default function StudentAssignments() {
   useEffect(() => {
     document.title = "Assignments | LMS Studio";
     
-    // Seed and sync enrollment course IDs
-    const savedCourses = localStorage.getItem("lms_enrolled_courses");
-    let enrolledIds = ["nextjs15", "uiuxfigma"];
-    if (savedCourses) {
-      enrolledIds = JSON.parse(savedCourses);
-    } else {
-      localStorage.setItem("lms_enrolled_courses", JSON.stringify(enrolledIds));
-    }
-    setEnrolledCourseIds(enrolledIds);
+    const syncAssignmentsData = async () => {
+      let enrolledIds = ["nextjs15", "uiuxfigma"];
+      let subs = DEFAULT_SUBMISSIONS;
 
-    // Seed and sync submissions
-    const savedSubmissions = localStorage.getItem("lms_submissions");
-    let subs = DEFAULT_SUBMISSIONS;
-    if (savedSubmissions) {
-      subs = JSON.parse(savedSubmissions);
-    } else {
-      localStorage.setItem("lms_submissions", JSON.stringify(DEFAULT_SUBMISSIONS));
-    }
-    setSubmissions(subs);
-  }, []);
+      if (user) {
+        const stats = await getUserStats(user.uid);
+        enrolledIds = stats?.enrolledCourses || [];
+        subs = await getSubmissions(user.uid, "student");
+      } else {
+        const savedCourses = localStorage.getItem("lms_enrolled_courses");
+        if (savedCourses) {
+          enrolledIds = JSON.parse(savedCourses);
+        }
+        const savedSubmissions = localStorage.getItem("lms_submissions");
+        if (savedSubmissions) {
+          subs = JSON.parse(savedSubmissions);
+        }
+      }
+      setEnrolledCourseIds(enrolledIds);
+      setSubmissions(subs);
+    };
+
+    syncAssignmentsData();
+  }, [user]);
 
   const getFilteredAssignments = () => {
     // Filter assignments DB to only include enrolled courses
@@ -155,10 +161,11 @@ export default function StudentAssignments() {
       enrolledCourseIds.includes(asg.courseId)
     );
 
-    // Map each assignment to include its current submission status for Muhammad Ahsan
+    const studentName = userData?.name || "Muhammad Ahsan";
+    // Map each assignment to include its current submission status
     const mapped = studentAssignments.map(asg => {
       const submission = submissions.find(sub => 
-        sub.studentName === "Muhammad Ahsan" && sub.assignmentId === asg.id
+        (sub.studentId === user?.uid || sub.studentName === studentName) && sub.assignmentId === asg.id
       );
 
       if (submission) {
@@ -263,14 +270,14 @@ export default function StudentAssignments() {
         setSubmitStep("Registering database entry...");
         setTimeout(() => {
           // Finalize submission
+          const studentName = userData?.name || "Muhammad Ahsan";
           const newSubmission = {
-            id: Date.now(),
-            studentName: "Muhammad Ahsan",
+            studentName,
+            studentId: user?.uid || "mock_uid_12345",
             courseId: selectedAssignment.courseId,
             course: selectedAssignment.courseTitle,
             assignmentId: selectedAssignment.id,
             assignment: selectedAssignment.title,
-            date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
             fileName: attachedFile.name,
             status: "Pending Review",
             grade: null,
@@ -278,9 +285,27 @@ export default function StudentAssignments() {
             comments: commentsText
           };
 
-          const currentSubs = [...submissions, newSubmission];
-          setSubmissions(currentSubs);
-          localStorage.setItem("lms_submissions", JSON.stringify(currentSubs));
+          const saveAndSync = async () => {
+            try {
+              if (user) {
+                await saveSubmission(newSubmission);
+                const current = await getSubmissions(user.uid, "student");
+                setSubmissions(current);
+              } else {
+                const legacySubmission = {
+                  ...newSubmission,
+                  id: Date.now(),
+                  date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                };
+                const currentSubs = [...submissions, legacySubmission];
+                setSubmissions(currentSubs);
+                localStorage.setItem("lms_submissions", JSON.stringify(currentSubs));
+              }
+            } catch (err) {
+              console.error("Error saving submission:", err);
+            }
+          };
+          saveAndSync();
 
           // Cleanup & Notify
           setIsSubmitting(false);

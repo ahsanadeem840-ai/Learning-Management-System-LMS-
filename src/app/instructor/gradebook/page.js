@@ -1,77 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { getSubmissions, saveSubmission } from "@/lib/db";
 
 export default function InstructorGradebook() {
+  const { user } = useAuth();
   const [submissions, setSubmissions] = useState([]);
   const [selectedSub, setSelectedSub] = useState(null);
   const [gradeInput, setGradeInput] = useState("");
   const [feedbackInput, setFeedbackInput] = useState("");
 
+  const syncSubmissions = async () => {
+    try {
+      const list = await getSubmissions(null, "instructor");
+      setSubmissions(list);
+    } catch (err) {
+      console.error("Error syncing submissions:", err);
+    }
+  };
+
   useEffect(() => {
     document.title = "Gradebook | LMS Studio";
     
-    // Seed and sync submissions
-    const savedSubmissions = localStorage.getItem("lms_submissions");
-    const defaultSubmissions = [
-      {
-        id: 1,
-        studentName: "Muhammad Ahsan",
-        courseId: "nextjs15",
-        course: "Next.js 15 Masterclass",
-        assignmentId: "nextjs15_a2",
-        assignment: "Module 2: Custom Layout Structure",
-        date: "Jul 29, 2026",
-        fileName: "layout-source-v2.zip",
-        status: "Pending Review",
-        grade: null,
-        feedback: "",
-        comments: "Attached is my zip containing the layout.js and sidebar collapsible components."
-      },
-      {
-        id: 2,
-        studentName: "John Smith",
-        courseId: "reactbasics",
-        course: "React Fundamental Course",
-        assignmentId: "reactbasics_a1",
-        assignment: "Module 1 Quiz: Hooks & Context API",
-        date: "Jul 27, 2026",
-        fileName: "react-quiz-answers.pdf",
-        status: "Graded",
-        grade: 92,
-        feedback: "Great work explaining context updates and handling cleanups in useEffect hook. Keep it up!",
-        comments: "Answers to the quiz questions in the PDF."
-      },
-      {
-        id: 3,
-        studentName: "Sarah Jenkins",
-        courseId: "nextjs15",
-        course: "Next.js 15 Masterclass",
-        assignmentId: "nextjs15_a1",
-        assignment: "Module 1: Server Actions & Form validation",
-        date: "Jul 25, 2026",
-        fileName: "form-action-submission.js",
-        status: "Pending Review",
-        grade: null,
-        feedback: "",
-        comments: "Finished the server actions with validation logic."
-      }
-    ];
-
-    if (savedSubmissions) {
-      setSubmissions(JSON.parse(savedSubmissions));
-    } else {
-      setSubmissions(defaultSubmissions);
-      localStorage.setItem("lms_submissions", JSON.stringify(defaultSubmissions));
-    }
-
-    // Sync state if updates are emitted in other pages
-    const syncSubmissions = () => {
-      const saved = localStorage.getItem("lms_submissions");
-      if (saved) {
-        setSubmissions(JSON.parse(saved));
-      }
-    };
+    syncSubmissions();
 
     window.addEventListener("lms_submissions_updated", syncSubmissions);
     return () => {
@@ -85,25 +37,22 @@ export default function InstructorGradebook() {
     setFeedbackInput(sub.feedback || "");
   };
 
-  const handleSaveGrade = () => {
+  const handleSaveGrade = async () => {
     if (!selectedSub || gradeInput === "") return;
 
-    const updated = submissions.map((s) =>
-      s.id === selectedSub.id
-        ? {
-            ...s,
-            status: "Graded",
-            grade: parseInt(gradeInput) || 0,
-            feedback: feedbackInput,
-          }
-        : s
-    );
+    const updatedSub = {
+      ...selectedSub,
+      status: "Graded",
+      grade: parseInt(gradeInput) || 0,
+      feedback: feedbackInput,
+    };
 
-    setSubmissions(updated);
-    localStorage.setItem("lms_submissions", JSON.stringify(updated));
-
-    // Dispatch custom event to notify other contexts
-    window.dispatchEvent(new Event("lms_submissions_updated"));
+    try {
+      await saveSubmission(updatedSub);
+      await syncSubmissions();
+    } catch (err) {
+      console.error("Error saving grade review:", err);
+    }
 
     setSelectedSub(null);
     setGradeInput("");
