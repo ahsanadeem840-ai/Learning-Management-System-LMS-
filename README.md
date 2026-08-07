@@ -79,6 +79,13 @@ A modern, high-performance, and feature-rich Learning Management System (LMS) we
     - Built a high-fidelity SVG circular progress score gauge showing percent and grade badge dynamically.
     - Synchronized quiz grades to update course syllabus progress and live grade records in the Assignments Console.
     - Created [docs/MODULE3_DOCUMENTATION.md](docs/MODULE3_DOCUMENTATION.md) compiling all Module 3 features and verification steps.
+  - **Day 5: Firebase Authentication & Cloud Firestore Integration** — *Completed*
+    - Installed `firebase` and configured Firebase Client initialization with Zero-Config Mock Bypass fallback ([`src/lib/firebase.js`](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/lib/firebase.js)).
+    - Created Authentication React Context ([`src/context/AuthContext.js`](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/context/AuthContext.js)) supporting Firebase Auth sessions, Google Sign-in popup authentication, role definitions, and synchronized custom user profiles.
+    - Implemented modular Cloud Firestore database services ([`src/lib/db.js`](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/lib/db.js)) for seeding courses, updating student statistics (study minutes, learning streak, last active), completed lessons checklist maps, and assignments/quiz submissions.
+    - Secured portal layout routing with strict guards ([`student/layout.js`](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/student/layout.js), [`instructor/layout.js`](file:///c:/Users/Mr%20Laptop%20Point/Desktop/Learninng%20Management%20System/src/app/instructor/layout.js)) ensuring students can only open student dashboards, whereas instructors/admins can access both areas.
+    - Refactored student and instructor profiles to resolve display names and initials dynamically from authentication states.
+    - Enforced mock login/signup account verification constraints including registered email checks and signup email uniqueness (throwing `"Account already exists"` on duplicate signup attempts).
 
 ---
 
@@ -93,6 +100,20 @@ Make sure you have [Node.js](https://nodejs.org/) installed (v18+ recommended).
    ```bash
    npm install
    ```
+
+### Firebase Configuration (Optional)
+To connect the application to your custom Firebase Authentication and Cloud Firestore instance:
+1. Create a `.env.local` file in the root directory.
+2. Add your Firebase Web API keys and identifiers:
+   ```env
+   NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+   ```
+*Note: If these environment variables are absent, the application automatically bypasses Firebase and runs securely using a local mock registry stored in `localStorage`.*
 
 ### Development
 Start the Next.js development server:
