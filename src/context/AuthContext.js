@@ -96,6 +96,36 @@ export function AuthProvider({ children }) {
     try {
       if (!isFirebaseConfigured) {
         // Mock register
+        const savedList = localStorage.getItem("lms_mock_users_list");
+        let mockUsers = savedList ? JSON.parse(savedList) : [];
+        
+        // Add default seeds to check list if empty
+        if (mockUsers.length === 0) {
+          mockUsers = [
+            {
+              uid: "mock_uid_instructor",
+              name: "Alex Rivers",
+              email: "alex.rivers@lms.studio",
+              role: "instructor",
+              createdAt: new Date().toISOString()
+            },
+            {
+              uid: "mock_uid_student",
+              name: "Muhammad Ahsan",
+              email: "ahsanadeem840@gmail.com",
+              role: "student",
+              createdAt: new Date().toISOString()
+            }
+          ];
+        }
+
+        const emailExists = mockUsers.some(u => u.email.toLowerCase() === email.toLowerCase());
+        if (emailExists) {
+          const err = new Error("Account already exists");
+          err.code = "auth/email-already-in-use";
+          throw err;
+        }
+
         const mockUid = "mock_uid_" + Math.random().toString(36).substr(2, 9);
         const newMockUser = {
           uid: mockUid,
@@ -104,6 +134,9 @@ export function AuthProvider({ children }) {
           role,
           createdAt: new Date().toISOString()
         };
+        
+        mockUsers.push(newMockUser);
+        localStorage.setItem("lms_mock_users_list", JSON.stringify(mockUsers));
         localStorage.setItem("lms_mock_user", JSON.stringify(newMockUser));
         window.dispatchEvent(new Event("lms_mock_auth_changed"));
         return { user: { uid: mockUid, email }, userData: newMockUser };
@@ -139,43 +172,41 @@ export function AuthProvider({ children }) {
     try {
       if (!isFirebaseConfigured) {
         // Mock login
-        const savedUser = localStorage.getItem("lms_mock_user");
-        if (savedUser) {
-          const registeredUser = JSON.parse(savedUser);
-          if (registeredUser.email.toLowerCase() === email.toLowerCase()) {
-            setUser({ uid: registeredUser.uid, email: registeredUser.email, displayName: registeredUser.name });
-            setUserData(registeredUser);
-            window.dispatchEvent(new Event("lms_mock_auth_changed"));
-            return { user: { uid: registeredUser.uid, email: registeredUser.email, displayName: registeredUser.name }, userData: registeredUser };
-          } else {
-            const err = new Error("Account not found");
-            err.code = "auth/user-not-found";
-            throw err;
-          }
-        } else {
-          // If no user is registered, check against default preset seeds
-          const isInstructor = email.toLowerCase().includes("instructor");
-          const defaultEmail = isInstructor ? "alex.rivers@lms.studio" : "ahsanadeem840@gmail.com";
-          const defaultName = isInstructor ? "Alex Rivers" : "Muhammad Ahsan";
-          
-          if (email.toLowerCase() === defaultEmail.toLowerCase()) {
-            const mockUser = {
-              uid: isInstructor ? "mock_uid_instructor" : "mock_uid_student",
-              name: defaultName,
-              email: defaultEmail,
-              role: isInstructor ? "instructor" : "student",
+        const savedList = localStorage.getItem("lms_mock_users_list");
+        let mockUsers = savedList ? JSON.parse(savedList) : [];
+
+        // If list is empty, initialize with default seeds
+        if (mockUsers.length === 0) {
+          mockUsers = [
+            {
+              uid: "mock_uid_instructor",
+              name: "Alex Rivers",
+              email: "alex.rivers@lms.studio",
+              role: "instructor",
               createdAt: new Date().toISOString()
-            };
-            localStorage.setItem("lms_mock_user", JSON.stringify(mockUser));
-            setUser({ uid: mockUser.uid, email: mockUser.email, displayName: mockUser.name });
-            setUserData(mockUser);
-            window.dispatchEvent(new Event("lms_mock_auth_changed"));
-            return { user: { uid: mockUser.uid, email: mockUser.email, displayName: mockUser.name }, userData: mockUser };
-          } else {
-            const err = new Error("Account not found");
-            err.code = "auth/user-not-found";
-            throw err;
-          }
+            },
+            {
+              uid: "mock_uid_student",
+              name: "Muhammad Ahsan",
+              email: "ahsanadeem840@gmail.com",
+              role: "student",
+              createdAt: new Date().toISOString()
+            }
+          ];
+          localStorage.setItem("lms_mock_users_list", JSON.stringify(mockUsers));
+        }
+
+        const registeredUser = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (registeredUser) {
+          localStorage.setItem("lms_mock_user", JSON.stringify(registeredUser));
+          setUser({ uid: registeredUser.uid, email: registeredUser.email, displayName: registeredUser.name });
+          setUserData(registeredUser);
+          window.dispatchEvent(new Event("lms_mock_auth_changed"));
+          return { user: { uid: registeredUser.uid, email: registeredUser.email, displayName: registeredUser.name }, userData: registeredUser };
+        } else {
+          const err = new Error("Account not found");
+          err.code = "auth/user-not-found";
+          throw err;
         }
       }
 

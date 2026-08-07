@@ -115,8 +115,8 @@ function SignupForm() {
     } catch (err) {
       console.error(err);
       let errMsg = "Failed to create account. Please try again.";
-      if (err.code === "auth/email-already-in-use") {
-        errMsg = "This email address is already in use by another account.";
+      if (err.code === "auth/email-already-in-use" || err.message === "Account already exists") {
+        errMsg = "Account already exists";
       } else if (err.code === "auth/invalid-email") {
         errMsg = "The email address is badly formatted.";
       } else if (err.code === "auth/weak-password") {
