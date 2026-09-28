@@ -5,7 +5,7 @@
 **A modern, production-ready MERN stack CRM and project management platform built specifically for freelancers and digital agencies.**
 
 [![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com/ahsanadeem840-ai/freelancer-crm-tracker)
-[![Roadmap Progress](https://img.shields.io/badge/Roadmap%20Progress-Day%2012%20of%2022%20(55%25)-6366f1?style=for-the-badge)](docs/REACT_APP_SETUP_AND_ROUTER.md)
+[![Roadmap Progress](https://img.shields.io/badge/Roadmap%20Progress-Day%2014%20of%2022%20(64%25)-6366f1?style=for-the-badge)](docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md)
 [![Tests Passing](https://img.shields.io/badge/Tests-353%2F353%20Passing-10b981?style=for-the-badge)](server/tests)
 [![MERN Stack](https://img.shields.io/badge/Stack-MERN%20%2B%20Socket.io%20%2B%20Stripe-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
@@ -202,23 +202,17 @@ Progress: [███████████████████████
   - [x] Sidebar aur Navbar banayein ([docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md](docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md))
   - [x] Dashboard page ka structure banayein (stats cards ki jagah & overview widgets)
 
-### Phase 5: Real-Time Engine
-- [ ] **Din 13: Socket.io Setup & Live Event Handlers**
-- [ ] **Din 14: Notification System & Activity Feeds**
+### Phase 6: Real-Time Engine & Fullstack Integration
+- [ ] **Din 15: Socket.io Setup & Live Event Handlers**
+- [ ] **Din 16: Notification System & Real-time Feeds**
+- [ ] **Din 17: Client CRM UI & Pipeline View**
+- [ ] **Din 18: Project Tracker & Milestone Overview**
+- [ ] **Din 19: Interactive Kanban Board (Drag & Drop)**
+- [ ] **Din 20: Invoice Builder & Stripe Payment Portal**
+- [ ] **Din 21: Real-time Socket.io Notification Bell & Toast Alerts**
 
-### Phase 6: Frontend Development (React + Tailwind CSS)
-- [ ] **Din 15: React Boilerplate & Tailwind Theme Setup**
-- [ ] **Din 16: Auth UI & Protected Routes**
-- [ ] **Din 17: Freelancer Dashboard & Analytics Cards**
-- [ ] **Din 18: Client CRM UI & Pipeline View**
-- [ ] **Din 19: Project Tracker & Milestone Overview**
-- [ ] **Din 20: Interactive Kanban Board (Drag & Drop)**
-- [ ] **Din 21: Invoice Builder & Stripe Payment Portal**
-- [ ] **Din 22: Real-time Socket.io Notification Bell & Toast Alerts**
-
-### Phase 7: Polish, Testing & Deployment
-- [ ] **Din 23: End-to-End Testing & Bug Fixes**
-- [ ] **Din 24: Production Build & Cloud Deployment**
+### Phase 7: Polish & Production Launch
+- [ ] **Din 22: End-to-End Testing, Production Build & Cloud Deployment**
 
 ---
 
