@@ -99,6 +99,8 @@ erDiagram
 > - [Task CRUD API & Project Linking (Din 10)](docs/TASK_CRUD_API.md)
 > - [Invoice API & Full Backend Test (Din 11)](docs/INVOICE_API_AND_FULL_BACKEND_TEST.md)
 > - [React App Setup & React Router (Din 12)](docs/REACT_APP_SETUP_AND_ROUTER.md)
+> - [Login/Signup Pages & Tailwind CSS Setup (Din 13)](docs/LOGIN_SIGNUP_PAGES_AND_TAILWIND_SETUP.md)
+> - [Dashboard Layout & Navigation (Din 14)](docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md)
 > - [Interactive Excalidraw Diagram File](docs/schema-diagram.excalidraw) (Open on [excalidraw.com](https://excalidraw.com))
 > - [High-Resolution SVG Vector Diagram](docs/schema-diagram.svg)
 
@@ -109,10 +111,10 @@ erDiagram
 This project is built following an intensive 22-day production roadmap (1 focused task per day):
 
 ### 📊 Roadmap Progress Tracker
-`Current Progress: 12 of 22 Days (55%) Completed`
+`Current Progress: 14 of 22 Days (64%) Completed`
 
 ```text
-Progress: [██████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░] 55%
+Progress: [█████████████████████████████████████░░░░░░░░░░░░░░░░░░░] 64%
 ```
 
 | Phase | Roadmap Days | Module Focus | Test Coverage | Status |
@@ -121,9 +123,9 @@ Progress: [███████████████████████
 | **Phase 2: Authentication & Security** | Din 5 - 7 | User model, Signup, Login JWT & 5-role RBAC guards | 74 Tests | ✅ Complete |
 | **Phase 3: Client & Project Management** | Din 8 - 10 | Multi-tenant Client CRM, Projects & Kanban Board | 142 Tests | ✅ Complete |
 | **Phase 4: Financials & Invoicing** | Din 11 | Invoice model, auto-generation, line items & client balances | 75 Tests | ✅ Complete |
-| **Phase 5: Frontend React SPA** | Din 12 | Vite React 19 app, React Router v7 routes & dark theme UI | 62 Tests | ✅ Complete |
-| **Phase 6: Real-Time Engine** | Din 13 - 14 | Socket.io server, live event handlers & notification feeds | Upcoming | ⏳ Next Up |
-| **Phase 7: Fullstack Feature Integration** | Din 15 - 21 | Auth state, Client CRM UI, Drag-Drop Kanban, Stripe | Upcoming | ⏳ Pending |
+| **Phase 5: Frontend React SPA & Auth** | Din 12 - 13 | Vite React 19 app, Router v7, Login/Signup UI & Tailwind CSS | 62 Tests | ✅ Complete |
+| **Phase 6: Dashboard Layout & Navigation** | Din 14 | Sidebar, Navbar, dynamic breadcrumbs, notification popover & Stats Cards | Verified | ✅ Complete |
+| **Phase 7: Real-Time Engine & Fullstack Integration** | Din 15 - 21 | Socket.io live updates, Client CRM UI, Drag-Drop Kanban, Stripe | Upcoming | ⏳ Next Up |
 | **Phase 8: Polish & Production Launch** | Din 22 | End-to-end testing, production bundle & cloud deployment | Full System | ⏳ Pending |
 
 ---
@@ -185,11 +187,20 @@ Progress: [███████████████████████
   - [x] Financial analytics & summary (`GET /api/invoices/stats`) ([docs/INVOICE_API_AND_FULL_BACKEND_TEST.md](docs/INVOICE_API_AND_FULL_BACKEND_TEST.md))
   - [x] Sab APIs ko Postman se dobara end-to-end test karein ([postman/Freelancer_CRM_Day11_Invoices_And_E2E.postman_collection.json](postman/Freelancer_CRM_Day11_Invoices_And_E2E.postman_collection.json))
   - [x] Automated 75-point test suite (`npm run test:day11`)
+
+### Phase 5: Frontend React SPA & Layout
 - [x] **Din 12: React App Setup & React Router**
   - [x] Vite se React 19 app banayein (Ultra-fast HMR, asset pipeline & proxy)
   - [x] React Router v7 install aur nested routes layout setup karein (`/`, `/clients`, `/projects`, `/tasks`, `/invoices`, `/login`, `/register`, `*`)
   - [x] Modern dark-slate design system with glassmorphism, responsive navigation & Plus Jakarta Sans typography
   - [x] Automated 62-point verification test suite (`npm run test:day12`) ([docs/REACT_APP_SETUP_AND_ROUTER.md](docs/REACT_APP_SETUP_AND_ROUTER.md))
+- [x] **Din 13: Login/Signup Pages & Tailwind CSS Setup**
+  - [x] Login aur Signup authentication pages ([docs/LOGIN_SIGNUP_PAGES_AND_TAILWIND_SETUP.md](docs/LOGIN_SIGNUP_PAGES_AND_TAILWIND_SETUP.md))
+  - [x] Dynamic user greeting system ("Good morning / afternoon / evening, [User]")
+  - [x] Tailwind CSS v4 styling setup and theme integration
+- [x] **Din 14: Dashboard Layout**
+  - [x] Sidebar aur Navbar banayein ([docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md](docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md))
+  - [x] Dashboard page ka structure banayein (stats cards ki jagah & overview widgets)
 
 ### Phase 5: Real-Time Engine
 - [ ] **Din 13: Socket.io Setup & Live Event Handlers**
