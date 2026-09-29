@@ -110,10 +110,10 @@ export default function Sidebar({ isOpen, onClose }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#a5b4fc', fontSize: '0.78rem', fontWeight: 700 }}>
             <Sparkles size={14} />
-            <span>MERN Stack • Day 12</span>
+            <span>MERN Stack • Day 14</span>
           </div>
           <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-            React 19 + React Router v7 SPA setup complete.
+            Dashboard Layout &amp; Navigation complete.
           </div>
         </div>
       </nav>

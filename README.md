@@ -6,7 +6,7 @@
 
 [![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com/ahsanadeem840-ai/freelancer-crm-tracker)
 [![Roadmap Progress](https://img.shields.io/badge/Roadmap%20Progress-Day%2014%20of%2022%20(64%25)-6366f1?style=for-the-badge)](docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md)
-[![Tests Passing](https://img.shields.io/badge/Tests-353%2F353%20Passing-10b981?style=for-the-badge)](server/tests)
+[![Tests Passing](https://img.shields.io/badge/Tests-385%2F385%20Passing-10b981?style=for-the-badge)](server/tests)
 [![MERN Stack](https://img.shields.io/badge/Stack-MERN%20%2B%20Socket.io%20%2B%20Stripe-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
