@@ -101,6 +101,7 @@ erDiagram
 > - [React App Setup & React Router (Din 12)](docs/REACT_APP_SETUP_AND_ROUTER.md)
 > - [Login/Signup Pages & Tailwind CSS Setup (Din 13)](docs/LOGIN_SIGNUP_PAGES_AND_TAILWIND_SETUP.md)
 > - [Dashboard Layout & Navigation (Din 14)](docs/DASHBOARD_LAYOUT_AND_NAVIGATION.md)
+> - [Clients Page Frontend & Axios API Integration (Din 15)](docs/CLIENTS_PAGE_AND_AXIOS_API.md)
 > - [Interactive Excalidraw Diagram File](docs/schema-diagram.excalidraw) (Open on [excalidraw.com](https://excalidraw.com))
 > - [High-Resolution SVG Vector Diagram](docs/schema-diagram.svg)
 
@@ -111,10 +112,10 @@ erDiagram
 This project is built following an intensive 22-day production roadmap (1 focused task per day):
 
 ### 📊 Roadmap Progress Tracker
-`Current Progress: 14 of 22 Days (64%) Completed`
+`Current Progress: 15 of 22 Days (68%) Completed`
 
 ```text
-Progress: [█████████████████████████████████████░░░░░░░░░░░░░░░░░░░] 64%
+Progress: [█████████████████████████████████████████░░░░░░░░░░░░░░░] 68%
 ```
 
 | Phase | Roadmap Days | Module Focus | Test Coverage | Status |
@@ -125,7 +126,7 @@ Progress: [███████████████████████
 | **Phase 4: Financials & Invoicing** | Din 11 | Invoice model, auto-generation, line items & client balances | 75 Tests | ✅ Complete |
 | **Phase 5: Frontend React SPA & Auth** | Din 12 - 13 | Vite React 19 app, Router v7, Login/Signup UI & Tailwind CSS | 62 Tests | ✅ Complete |
 | **Phase 6: Dashboard Layout & Navigation** | Din 14 | Sidebar, Navbar, dynamic breadcrumbs, notification popover & Stats Cards | Verified | ✅ Complete |
-| **Phase 7: Real-Time Engine & Fullstack Integration** | Din 15 - 21 | Socket.io live updates, Client CRM UI, Drag-Drop Kanban, Stripe | Upcoming | ⏳ Next Up |
+| **Phase 7: Real-Time Engine & Fullstack Integration** | Din 15 - 21 | Clients CRM UI & Axios API, Projects, Drag-Drop Kanban, Stripe | 26 Tests | 🔄 In Progress |
 | **Phase 8: Polish & Production Launch** | Din 22 | End-to-end testing, production bundle & cloud deployment | Full System | ⏳ Pending |
 
 ---
@@ -205,9 +206,13 @@ Progress: [███████████████████████
   - [x] Automated 32-point verification test suite (`npm run test:day14`)
 
 ### Phase 6: Real-Time Engine & Fullstack Integration
-- [ ] **Din 15: Socket.io Setup & Live Event Handlers**
-- [ ] **Din 16: Notification System & Real-time Feeds**
-- [ ] **Din 17: Client CRM UI & Pipeline View**
+- [x] **Din 15: Clients Page Frontend & Axios API Integration**
+  - [x] Clients list UI banayein with pipeline stage tabs, search bar, and 4 metric stat cards ([docs/CLIENTS_PAGE_AND_AXIOS_API.md](docs/CLIENTS_PAGE_AND_AXIOS_API.md))
+  - [x] Axios se backend Client REST API connect karein (`getAll`, `getStats`, `create`, `update`, `delete`)
+  - [x] Interactive Add Client, Edit Client, View Details, and Delete confirmation modals
+  - [x] Automated 26-point verification test suite (`npm run test:day15`)
+- [ ] **Din 16: Socket.io Setup & Live Event Handlers**
+- [ ] **Din 17: Notification System & Real-time Feeds**
 - [ ] **Din 18: Project Tracker & Milestone Overview**
 - [ ] **Din 19: Interactive Kanban Board (Drag & Drop)**
 - [ ] **Din 20: Invoice Builder & Stripe Payment Portal**
